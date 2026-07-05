@@ -1,0 +1,501 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>FlowProd — Acesso ao Sistema</title>
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/@tabler/icons-webfont@latest/tabler-icons.min.css">
+<style>
+  :root {
+    --bg:       #080d14;
+    --surface:  #0d1520;
+    --surface2: #111e30;
+    --border:   #1a2840;
+    --border2:  #243550;
+    --blue:     #2b7fff;
+    --blue-dk:  #1a5ccc;
+    --blue-glow:rgba(43,127,255,.15);
+    --green:    #22c55e;
+    --error:    #f43f5e;
+    --text:     #e8edf5;
+    --muted:    #6b82a0;
+    --dim:      #3a5070;
+  }
+  *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+  body {
+    background: var(--bg);
+    color: var(--text);
+    font-family: 'Inter', sans-serif;
+    min-height: 100vh;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    padding: 24px;
+    position: relative;
+    overflow: hidden;
+  }
+
+  /* Grade de fundo sutil */
+  body::before {
+    content: '';
+    position: fixed; inset: 0; z-index: 0; pointer-events: none;
+    background-image:
+      linear-gradient(rgba(43,127,255,.025) 1px, transparent 1px),
+      linear-gradient(90deg, rgba(43,127,255,.025) 1px, transparent 1px);
+    background-size: 52px 52px;
+  }
+
+  /* Brilho central difuso */
+  body::after {
+    content: '';
+    position: fixed;
+    top: -20%; left: 50%; transform: translateX(-50%);
+    width: 600px; height: 400px;
+    background: radial-gradient(ellipse, rgba(43,127,255,.06) 0%, transparent 70%);
+    pointer-events: none; z-index: 0;
+  }
+
+  .back-link {
+    position: fixed; top: 20px; left: 24px; z-index: 10;
+    color: var(--muted); font-size: 13px; text-decoration: none;
+    display: flex; align-items: center; gap: 6px; transition: color .2s;
+  }
+  .back-link:hover { color: var(--blue); }
+
+  /* ── Card principal ── */
+  .card {
+    position: relative; z-index: 1;
+    background: var(--surface);
+    border: 1px solid var(--border);
+    border-radius: 20px;
+    padding: 40px 36px;
+    width: 100%; max-width: 400px;
+    display: flex; flex-direction: column; gap: 22px;
+  }
+
+  /* ── Header ── */
+  .card-header { text-align: center; display: flex; flex-direction: column; gap: 10px; align-items: center; }
+
+  .logo-wrap {
+    display: flex; align-items: center; gap: 10px; justify-content: center;
+  }
+  .logo-icon {
+    width: 36px; height: 36px; border-radius: 9px;
+    background: var(--blue-glow);
+    border: 1px solid rgba(43,127,255,.3);
+    display: flex; align-items: center; justify-content: center;
+    color: var(--blue); font-size: 18px;
+  }
+  .logo-name { font-size: 20px; font-weight: 700; color: var(--text); letter-spacing: -.3px; }
+  .logo-name span { color: var(--blue); }
+
+  .role-badge {
+    display: inline-flex; align-items: center; gap: 6px;
+    padding: 4px 14px; border-radius: 20px; font-size: 11px; font-weight: 600;
+    letter-spacing: .6px; text-transform: uppercase;
+    background: rgba(43,127,255,.1); color: var(--blue); border: 1px solid rgba(43,127,255,.2);
+  }
+
+  .card-title { font-size: 20px; font-weight: 600; letter-spacing: -.3px; }
+  .card-sub   { color: var(--muted); font-size: 13px; line-height: 1.6; }
+
+  /* ── Divider ── */
+  .divider-line { height: 1px; background: var(--border); }
+
+  /* ── Campos ── */
+  .field { display: flex; flex-direction: column; gap: 6px; }
+  .field label {
+    font-size: 11px; font-weight: 600; color: var(--muted);
+    text-transform: uppercase; letter-spacing: .7px;
+  }
+  .input-wrap { position: relative; }
+  .input-icon {
+    position: absolute; left: 12px; top: 50%; transform: translateY(-50%);
+    color: var(--dim); font-size: 16px; pointer-events: none;
+  }
+  input[type="email"],
+  input[type="password"],
+  input[type="text"] {
+    width: 100%;
+    background: var(--bg);
+    border: 1px solid var(--border);
+    border-radius: 10px;
+    color: var(--text);
+    font-family: 'Inter', sans-serif;
+    font-size: 14px;
+    padding: 11px 42px;
+    outline: none;
+    transition: border-color .2s, box-shadow .2s;
+  }
+  input::placeholder { color: var(--dim); }
+  input:focus {
+    border-color: var(--blue);
+    box-shadow: 0 0 0 3px var(--blue-glow);
+  }
+  .eye-btn {
+    position: absolute; right: 12px; top: 50%; transform: translateY(-50%);
+    background: none; border: none; cursor: pointer;
+    color: var(--muted); font-size: 16px; transition: color .2s;
+  }
+  .eye-btn:hover { color: var(--text); }
+
+  .forgot-btn {
+    background: none; border: none; cursor: pointer;
+    font-family: 'Inter', sans-serif; font-size: 12px;
+    color: var(--muted); text-align: right; align-self: flex-end;
+    transition: color .2s; padding: 0;
+  }
+  .forgot-btn:hover { color: var(--blue); }
+
+  /* ── Mensagens ── */
+  .msg {
+    border-radius: 10px; font-size: 13px; padding: 10px 14px;
+    text-align: center; display: none; line-height: 1.5;
+  }
+  .msg.err { background: rgba(244,63,94,.08); border: 1px solid rgba(244,63,94,.2); color: var(--error); }
+  .msg.ok  { background: rgba(34,197,94,.08);  border: 1px solid rgba(34,197,94,.2);  color: var(--green); }
+  .msg.inf { background: rgba(43,127,255,.08); border: 1px solid rgba(43,127,255,.2); color: var(--blue); }
+
+  /* ── Botão principal ── */
+  .btn-submit {
+    background: var(--blue);
+    border: none; border-radius: 10px;
+    color: #fff; cursor: pointer;
+    font-family: 'Inter', sans-serif; font-size: 14px; font-weight: 600;
+    padding: 13px; width: 100%;
+    transition: background .2s, opacity .2s;
+    display: flex; align-items: center; justify-content: center; gap: 8px;
+  }
+  .btn-submit:hover:not(:disabled) { background: var(--blue-dk); }
+  .btn-submit:disabled { opacity: .5; cursor: not-allowed; }
+  .btn-submit.success { background: linear-gradient(135deg, #15803d, var(--green)); }
+
+  .spinner {
+    width: 15px; height: 15px;
+    border: 2px solid rgba(255,255,255,.3);
+    border-top-color: #fff;
+    border-radius: 50%;
+    animation: spin .7s linear infinite;
+    display: none;
+  }
+  @keyframes spin { to { transform: rotate(360deg); } }
+
+  /* ── Footer links ── */
+  .divider-text {
+    display: flex; align-items: center; gap: 10px;
+    color: var(--dim); font-size: 12px;
+  }
+  .divider-text::before, .divider-text::after {
+    content: ''; flex: 1; height: 1px; background: var(--border);
+  }
+  .links-footer { display: flex; flex-direction: column; gap: 8px; }
+  .link-item {
+    text-align: center; font-size: 13px; color: var(--dim);
+  }
+  .link-item a {
+    color: var(--blue); text-decoration: none; font-weight: 500;
+    transition: opacity .2s;
+  }
+  .link-item a:hover { opacity: .8; text-decoration: underline; }
+
+  /* ── Modal redefinir senha ── */
+  .overlay {
+    position: fixed; inset: 0; z-index: 100;
+    background: rgba(8,13,20,.85); backdrop-filter: blur(8px);
+    display: flex; align-items: center; justify-content: center;
+    padding: 16px;
+  }
+  .modal-box {
+    background: var(--surface); border: 1px solid var(--border2);
+    border-radius: 18px; padding: 36px 32px; width: 100%; max-width: 360px;
+    display: flex; flex-direction: column; gap: 16px;
+    animation: scaleIn .2s ease;
+  }
+  @keyframes scaleIn { from { transform: scale(.94); opacity: 0; } to { transform: scale(1); opacity: 1; } }
+  .modal-icon { font-size: 32px; text-align: center; color: var(--blue); }
+  .modal-box h3 { font-size: 17px; font-weight: 600; text-align: center; }
+  .modal-box p  { color: var(--muted); font-size: 13px; line-height: 1.6; text-align: center; }
+  .modal-footer { display: flex; gap: 10px; }
+  .btn-sec {
+    flex: 1; padding: 10px; border-radius: 9px;
+    border: 1px solid var(--border2); background: none;
+    color: var(--muted); cursor: pointer; font-family: 'Inter', sans-serif;
+    font-size: 13px; transition: .2s;
+  }
+  .btn-sec:hover { border-color: var(--blue); color: var(--blue); }
+  .btn-pri {
+    flex: 1; padding: 10px; border-radius: 9px;
+    border: none; background: var(--blue);
+    color: #fff; cursor: pointer; font-family: 'Inter', sans-serif;
+    font-size: 13px; font-weight: 600; transition: .2s;
+  }
+  .btn-pri:hover { background: var(--blue-dk); }
+  .btn-pri:disabled { opacity: .5; cursor: not-allowed; }
+
+  /* ── Modal módulos ── */
+  .modulo-overlay {
+    position: fixed; inset: 0; z-index: 200;
+    background: rgba(8,13,20,.9); backdrop-filter: blur(10px);
+    display: flex; align-items: center; justify-content: center; padding: 16px;
+  }
+  .modulo-box {
+    background: var(--surface); border: 1px solid var(--border);
+    border-radius: 20px; padding: 36px 28px; width: 100%; max-width: 400px;
+    display: flex; flex-direction: column; gap: 12px; text-align: center;
+    animation: scaleIn .2s ease;
+  }
+  .modulo-box h2 { font-size: 18px; font-weight: 600; }
+  .modulo-box .sub { color: var(--muted); font-size: 13px; }
+  .modulo-btn {
+    display: flex; align-items: center; gap: 12px; text-align: left;
+    background: var(--bg); border: 1px solid var(--border);
+    border-radius: 12px; padding: 14px 16px;
+    cursor: pointer; transition: .2s;
+    text-decoration: none; color: var(--text);
+  }
+  .modulo-btn:hover { border-color: var(--blue); background: rgba(43,127,255,.05); }
+  .m-icon-wrap {
+    width: 36px; height: 36px; border-radius: 8px;
+    background: rgba(43,127,255,.1); border: 1px solid rgba(43,127,255,.2);
+    display: flex; align-items: center; justify-content: center;
+    font-size: 18px; flex-shrink: 0;
+  }
+  .m-nome { font-size: 14px; font-weight: 500; }
+  .m-desc { font-size: 11px; color: var(--muted); margin-top: 1px; }
+  .m-arrow { margin-left: auto; color: var(--dim); font-size: 16px; }
+</style>
+</head>
+<body>
+
+<a href="/" class="back-link">
+  <i class="ti ti-arrow-left"></i> Início
+</a>
+
+<div class="card">
+  <div class="card-header">
+    <div class="logo-wrap">
+      <div class="logo-icon"><i class="ti ti-settings-automation"></i></div>
+      <span class="logo-name">Flow<span>Prod</span></span>
+    </div>
+    <span class="role-badge"><i class="ti ti-users"></i> Colaborador</span>
+    <h1 class="card-title">Acesso ao sistema</h1>
+    <p class="card-sub">Área exclusiva para colaboradores cadastrados pelo administrador.</p>
+  </div>
+
+  <div class="divider-line"></div>
+
+  <div class="field">
+    <label>E-mail</label>
+    <div class="input-wrap">
+      <i class="ti ti-mail input-icon"></i>
+      <input type="email" id="email" placeholder="seu@email.com" autocomplete="username">
+    </div>
+  </div>
+
+  <div class="field">
+    <label>Senha</label>
+    <div class="input-wrap">
+      <i class="ti ti-lock input-icon"></i>
+      <input type="password" id="senha" placeholder="••••••••" autocomplete="current-password">
+      <button type="button" class="eye-btn" onclick="toggleSenha()" id="eyeBtn">
+        <i class="ti ti-eye" id="eyeIcon"></i>
+      </button>
+    </div>
+    <button class="forgot-btn" id="forgotBtn">Esqueceu a senha?</button>
+  </div>
+
+  <div class="msg" id="msg"></div>
+
+  <button class="btn-submit" id="btnLogin" onclick="fazerLogin()">
+    <span id="btnText">Entrar no sistema</span>
+    <div class="spinner" id="spinner"></div>
+  </button>
+
+  <div class="divider-text">ou</div>
+
+  <div class="links-footer">
+    <div class="link-item">
+      É cliente? <a href="/cliente.html">Acessar área do cliente →</a>
+    </div>
+    <div class="link-item">
+      Novo colaborador? <a href="/solicitar-acesso.html">Solicitar acesso →</a>
+    </div>
+  </div>
+</div>
+
+<!-- Modal redefinir senha -->
+<div class="overlay" id="modalSenha" style="display:none">
+  <div class="modal-box">
+    <div class="modal-icon"><i class="ti ti-key"></i></div>
+    <h3>Redefinir senha</h3>
+    <p>Informe seu e-mail. O administrador receberá a solicitação e definirá uma nova senha para você.</p>
+    <div class="field">
+      <label>E-mail</label>
+      <div class="input-wrap">
+        <i class="ti ti-mail input-icon"></i>
+        <input type="email" id="resetEmail" placeholder="seu@email.com">
+      </div>
+    </div>
+    <div class="msg" id="resetMsg"></div>
+    <div class="modal-footer">
+      <button class="btn-sec" onclick="fecharModal()">Cancelar</button>
+      <button class="btn-pri" id="resetBtn" onclick="enviarReset()">Enviar</button>
+    </div>
+  </div>
+</div>
+
+<!-- Modal seleção de módulos -->
+<div class="modulo-overlay" id="moduloOverlay" style="display:none">
+  <div class="modulo-box">
+    <div style="font-size:40px">🗂️</div>
+    <h2>Selecione o módulo</h2>
+    <p class="sub" id="moduloSub"></p>
+    <div id="moduloBtns"></div>
+  </div>
+</div>
+
+<script>
+  const MODULO_INFO = {
+    FORECAST:  { icon:'📊', nome:'Forecast',       desc:'Previsão de Demanda' },
+    PMP:       { icon:'📋', nome:'PMP',            desc:'Plano Mestre de Produção' },
+    MRP:       { icon:'⚙️', nome:'MRP',            desc:'Planejamento de Materiais' },
+    ESTOQUE:   { icon:'📦', nome:'Estoque',        desc:'Controle de Estoque' },
+    CRP:       { icon:'🏭', nome:'CRP',            desc:'Planejamento de Capacidade' },
+    DASHBOARD: { icon:'📈', nome:'Dashboard',      desc:'Painel de Controle' },
+    ADMIN:     { icon:'🛠️', nome:'Administração',  desc:'Painel do Administrador' },
+  };
+
+  function toggleSenha() {
+    const inp  = document.getElementById('senha');
+    const icon = document.getElementById('eyeIcon');
+    inp.type   = inp.type === 'password' ? 'text' : 'password';
+    icon.className = inp.type === 'password' ? 'ti ti-eye' : 'ti ti-eye-off';
+  }
+
+  function mostrarMsg(id, texto, tipo) {
+    const el = document.getElementById(id);
+    el.textContent = texto;
+    el.className   = `msg ${tipo}`;
+    el.style.display = 'block';
+  }
+
+  async function fazerLogin() {
+    const email = document.getElementById('email').value.trim();
+    const senha = document.getElementById('senha').value;
+    document.getElementById('msg').style.display = 'none';
+    if (!email || !senha) return mostrarMsg('msg', 'Preencha e-mail e senha.', 'err');
+
+    const btn = document.getElementById('btnLogin');
+    const txt = document.getElementById('btnText');
+    const sp  = document.getElementById('spinner');
+    btn.disabled = true; txt.style.display = 'none'; sp.style.display = 'block';
+
+    try {
+      const r = await fetch('/api/login', {
+        method: 'POST', credentials: 'include',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ email, senha })
+      });
+      const d = await r.json();
+      if (!r.ok) throw new Error(d.erro || 'Erro ao fazer login.');
+
+      txt.style.display = 'block';
+      txt.textContent   = '✔ Acesso liberado!';
+      sp.style.display  = 'none';
+      btn.classList.add('success');
+
+      setTimeout(() => {
+        if (d.redirecionar) window.location.href = d.redirecionar;
+        else abrirMenuModulos(d.usuario.nome, d.telasDisponiveis);
+      }, 500);
+    } catch(e) {
+      btn.disabled = false; txt.style.display = 'block';
+      txt.textContent = 'Entrar no sistema'; sp.style.display = 'none';
+      btn.classList.remove('success');
+      if (e.message.includes('bloqueado') || e.message.includes('Muitas tentativas')) {
+        btn.disabled = true;
+        setTimeout(() => {
+          btn.disabled = false;
+          mostrarMsg('msg', 'Você pode tentar novamente agora.', 'ok');
+        }, 15 * 60 * 1000);
+      }
+      mostrarMsg('msg', e.message, 'err');
+    }
+  }
+
+  function abrirMenuModulos(nome, telas) {
+    document.getElementById('moduloSub').textContent =
+      `Olá, ${nome}! Você tem acesso a ${telas.length} módulo${telas.length !== 1 ? 's' : ''}.`;
+    const c = document.getElementById('moduloBtns');
+    c.innerHTML = '';
+    telas.forEach(t => {
+      const info = MODULO_INFO[t.funcao] || { icon: '🔧', nome: t.funcao, desc: '' };
+      const a = document.createElement('a');
+      a.href = t.url; a.className = 'modulo-btn';
+      a.innerHTML = `
+        <div class="m-icon-wrap">${info.icon}</div>
+        <div>
+          <div class="m-nome">${info.nome}</div>
+          <div class="m-desc">${info.desc}</div>
+        </div>
+        <i class="ti ti-chevron-right m-arrow"></i>`;
+      c.appendChild(a);
+    });
+    document.getElementById('moduloOverlay').style.display = 'flex';
+  }
+
+  document.getElementById('forgotBtn').addEventListener('click', () => {
+    document.getElementById('modalSenha').style.display = 'flex';
+  });
+
+  function fecharModal() {
+    document.getElementById('modalSenha').style.display = 'none';
+    document.getElementById('resetMsg').style.display = 'none';
+    document.getElementById('resetEmail').value = '';
+    const btn = document.getElementById('resetBtn');
+    btn.disabled = false; btn.textContent = 'Enviar';
+  }
+
+  async function enviarReset() {
+    const email = document.getElementById('resetEmail').value.trim();
+    if (!email) return mostrarMsg('resetMsg', 'Informe seu e-mail.', 'err');
+    const btn = document.getElementById('resetBtn');
+    btn.disabled = true; btn.textContent = 'Enviando...';
+    try {
+      const r = await fetch('/api/senha/solicitar', {
+        method: 'POST', headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ email })
+      });
+      const d = await r.json();
+      mostrarMsg('resetMsg', d.mensagem || d.erro, r.ok ? 'ok' : 'err');
+      if (r.ok) btn.textContent = 'Enviado!';
+      else { btn.disabled = false; btn.textContent = 'Enviar'; }
+    } catch {
+      mostrarMsg('resetMsg', 'Erro de conexão.', 'err');
+      btn.disabled = false; btn.textContent = 'Enviar';
+    }
+  }
+
+  document.getElementById('senha').addEventListener('keydown', e => {
+    if (e.key === 'Enter') fazerLogin();
+  });
+  document.addEventListener('keydown', e => {
+    if (e.key === 'Escape') fecharModal();
+  });
+
+  const urlEmail = new URLSearchParams(window.location.search).get('email');
+  if (urlEmail) {
+    document.getElementById('email').value = urlEmail;
+    document.getElementById('senha').focus();
+  }
+  const emailSalvo = localStorage.getItem('flowprod_executor_email');
+  if (emailSalvo) {
+    document.getElementById('email').value = emailSalvo;
+    localStorage.removeItem('flowprod_executor_email');
+    document.getElementById('senha').focus();
+  }
+</script>
+</body>
+</html>

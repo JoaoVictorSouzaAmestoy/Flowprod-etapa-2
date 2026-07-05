@@ -1,0 +1,366 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>FlowProd — Verificar Acesso</title>
+<link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+<style>
+  :root{
+    --bg:#080d14; --surface:#0d1520; --border:#1a2740;
+    --text:#e8edf5; --muted:#6b82a0; --dim:#3a5070;
+    --blue:#2b7fff; --blue-dk:#1a5ccc;
+    --green:#22c55e; --error:#f43f5e; --amber:#f59e0b;
+  }
+  *{box-sizing:border-box;margin:0;padding:0;}
+  body{
+    background:var(--bg);color:var(--text);font-family:'Poppins',sans-serif;
+    min-height:100vh;display:flex;flex-direction:column;
+    align-items:center;justify-content:flex-start;padding:24px;
+    padding-top: 90px;
+  }
+  .back{
+    position:fixed;top:18px;left:22px;color:var(--muted);font-size:13px;
+    text-decoration:none;display:flex;align-items:center;gap:5px;transition:.2s;
+  }
+  .back:hover{color:var(--blue);}
+
+  /* ── Card principal ── */
+  .card{
+    background:var(--surface);border:1px solid var(--border);border-radius:16px;
+    padding:28px 24px;width:100%;max-width:400px;
+    display:flex;flex-direction:column;gap:16px;
+  }
+  .card-top{text-align:center;display:flex;flex-direction:column;gap:10px;align-items:center;}
+  .logo{font-size:19px;font-weight:700;color:var(--blue);letter-spacing:1px;}
+  .card-icon{font-size:52px;filter:drop-shadow(0 0 20px rgba(43,127,255,.3));}
+  h2{font-size:20px;font-weight:700;}
+  .sub{color:var(--muted);font-size:13px;line-height:1.7;max-width:320px;}
+
+  .form-group{display:flex;flex-direction:column;gap:6px;}
+  label{font-size:11px;font-weight:600;color:var(--muted);text-transform:uppercase;letter-spacing:.7px;}
+  input{
+    background:var(--bg);border:1px solid var(--border);border-radius:8px;
+    color:var(--text);font-family:'Poppins',sans-serif;font-size:14px;
+    padding:11px 14px;transition:.2s;outline:none;width:100%;
+  }
+  input:focus{border-color:var(--blue);}
+
+  .btn{
+    border:none;border-radius:8px;color:#fff;cursor:pointer;
+    font-family:'Poppins',sans-serif;font-size:14px;font-weight:600;
+    padding:13px;width:100%;transition:.2s;
+    display:flex;align-items:center;justify-content:center;gap:8px;
+  }
+  .btn-blue{background:linear-gradient(135deg,var(--blue-dk),var(--blue));}
+  .btn-green{background:linear-gradient(135deg,#15803d,var(--green));}
+  .btn-ghost{
+    background:none;border:1px solid var(--border);color:var(--muted);
+  }
+  .btn-ghost:hover{border-color:var(--blue);color:var(--blue);}
+  .btn:hover{opacity:.9;}
+  .btn:disabled{opacity:.5;cursor:not-allowed;}
+
+  .spinner{
+    width:14px;height:14px;border:2px solid rgba(255,255,255,.3);
+    border-top-color:#fff;border-radius:50%;
+    animation:spin .7s linear infinite;display:none;
+  }
+  @keyframes spin{to{transform:rotate(360deg);}}
+
+  .msg{border-radius:8px;font-size:13px;padding:10px 14px;text-align:center;display:none;}
+  .msg.err{background:rgba(244,63,94,.1);border:1px solid rgba(244,63,94,.25);color:var(--error);}
+
+  .info-box{
+    background:var(--bg);border:1px solid var(--border);border-radius:8px;
+    padding:11px 14px;font-size:12px;color:var(--dim);line-height:1.7;
+  }
+
+  /* ── Resultado da busca ── */
+  #resultado{display:none;}
+
+  .result-header{
+    display:flex;align-items:center;gap:12px;
+    padding-bottom:16px;border-bottom:1px solid var(--border);
+  }
+  .result-avatar{
+    width:44px;height:44px;border-radius:50%;
+    background:linear-gradient(135deg,var(--blue-dk),var(--blue));
+    display:flex;align-items:center;justify-content:center;
+    font-size:18px;font-weight:700;flex-shrink:0;
+  }
+  .result-nome{font-size:16px;font-weight:700;}
+  .result-sub{font-size:12px;color:var(--muted);margin-top:2px;}
+
+  /* Múltiplos resultados */
+  .result-lista{display:flex;flex-direction:column;gap:8px;}
+  .result-item{
+    background:var(--bg);border:1px solid var(--border);border-radius:10px;
+    padding:14px 16px;cursor:pointer;transition:.2s;
+    display:flex;align-items:center;gap:12px;
+  }
+  .result-item:hover{border-color:var(--blue);background:#0a1220;}
+  .result-item-avatar{
+    width:36px;height:36px;border-radius:50%;
+    background:linear-gradient(135deg,var(--blue-dk),var(--blue));
+    display:flex;align-items:center;justify-content:center;
+    font-size:14px;font-weight:700;flex-shrink:0;
+  }
+  .result-item-nome{font-size:14px;font-weight:600;}
+  .result-item-modulos{font-size:11px;color:var(--muted);margin-top:2px;}
+  .result-item-seta{margin-left:auto;color:var(--dim);font-size:18px;}
+
+  /* Caixa de credenciais */
+  .cred-box{
+    background:var(--bg);border:1px solid rgba(34,197,94,.25);border-radius:10px;
+    padding:18px 20px;display:flex;flex-direction:column;gap:12px;
+  }
+  .cred-titulo{font-size:12px;font-weight:700;color:var(--green);text-transform:uppercase;letter-spacing:.8px;}
+  .cred-linha{display:flex;align-items:center;justify-content:space-between;gap:8px;flex-wrap:wrap;}
+  .cred-label{font-size:12px;color:var(--muted);flex-shrink:0;}
+  .cred-val{
+    font-family:'Consolas',monospace;font-size:14px;font-weight:600;
+    background:var(--surface);padding:4px 10px;border-radius:6px;
+    border:1px solid var(--border);color:var(--text);word-break:break-all;
+  }
+  .cred-copy{
+    background:none;border:1px solid var(--border);color:var(--muted);
+    padding:4px 10px;border-radius:5px;cursor:pointer;font-size:11px;
+    font-family:'Poppins',sans-serif;transition:.2s;flex-shrink:0;
+  }
+  .cred-copy:hover{border-color:var(--blue);color:var(--blue);}
+
+  .funcoes-wrap{display:flex;flex-wrap:wrap;gap:6px;margin-top:4px;}
+  .funcao-tag{
+    padding:3px 10px;border-radius:5px;font-size:11px;font-weight:700;
+    background:rgba(43,127,255,.12);color:var(--blue);border:1px solid rgba(43,127,255,.2);
+  }
+
+  .aviso-box{
+    background:rgba(245,158,11,.06);border:1px solid rgba(245,158,11,.2);
+    border-radius:8px;padding:11px 14px;font-size:12px;color:var(--amber);line-height:1.7;
+  }
+
+  .link-login{text-align:center;font-size:13px;color:var(--dim);}
+  .link-login a{color:var(--blue);text-decoration:none;font-weight:500;}
+  .link-login a:hover{text-decoration:underline;}
+
+</style>
+</head>
+<body>
+<a href="/login.html" class="back">← Login</a>
+
+<div class="card">
+
+  <!-- CABEÇALHO -->
+  <div class="card-top">
+    <span class="logo">FlowProd</span>
+    <div class="card-icon">🏭</div>
+    <h2>Verificar Acesso de Colaborador</h2>
+    <p class="sub">Digite seu nome para verificar se o administrador criou uma conta para você.</p>
+  </div>
+
+  <!-- BUSCA POR NOME -->
+  <div id="secBusca">
+    <div style="display:flex;flex-direction:column;gap:14px;">
+      <div class="form-group">
+        <label>Seu nome</label>
+        <input type="text" id="inputNome" placeholder="Ex: João Silva" autocomplete="off">
+      </div>
+      <div class="msg" id="msgBusca"></div>
+      <button class="btn btn-blue" id="btnBuscar" onclick="buscar()">
+        <span id="btnTxt">Verificar</span>
+        <div class="spinner" id="btnSp"></div>
+      </button>
+      <div class="info-box">
+        🔍 Se o administrador criou uma conta com seu nome, você verá suas credenciais aqui.<br>
+        Use-as para fazer login pela primeira vez.
+      </div>
+    </div>
+  </div>
+
+  <!-- RESULTADO: múltiplos usuários (escolher) -->
+  <div id="secEscolha" style="display:none;">
+    <div style="display:flex;flex-direction:column;gap:12px;">
+      <div style="font-size:13px;color:var(--muted);">Encontramos mais de uma conta. Selecione a sua:</div>
+      <div class="result-lista" id="listaResultados"></div>
+      <button class="btn btn-ghost" onclick="voltarBusca()">← Buscar novamente</button>
+    </div>
+  </div>
+
+  <!-- RESULTADO: credenciais do executor -->
+  <div id="secCred" style="display:none;">
+    <div style="display:flex;flex-direction:column;gap:16px;">
+
+      <div class="result-header">
+        <div class="result-avatar" id="credAvatar">?</div>
+        <div>
+          <div class="result-nome" id="credNome">—</div>
+          <div class="result-sub">Conta criada — suas credenciais estão abaixo</div>
+        </div>
+      </div>
+
+      <div class="cred-box">
+        <div class="cred-titulo">🔑 Suas credenciais de acesso</div>
+
+        <div class="cred-linha">
+          <span class="cred-label">E-mail:</span>
+          <span class="cred-val" id="credEmail">—</span>
+          <button class="cred-copy" onclick="copiar('credEmail')">Copiar</button>
+        </div>
+
+        <div class="cred-linha">
+          <span class="cred-label">Senha:</span>
+          <span class="cred-val" id="credSenha">—</span>
+          <button class="cred-copy" onclick="copiar('credSenha')">Copiar</button>
+        </div>
+
+        <div>
+          <div style="font-size:12px;color:var(--muted);margin-bottom:6px;">Seus módulos:</div>
+          <div class="funcoes-wrap" id="credFuncoes"></div>
+        </div>
+      </div>
+
+      <div class="aviso-box">
+        ⚠️ Guarde estas informações. Após fazer login, suas notificações confirmarão a criação da conta.
+      </div>
+
+      <button class="btn btn-green" id="btnIrLogin" onclick="irParaLogin()">
+        Entrar no sistema agora →
+      </button>
+
+      <button class="btn btn-ghost" onclick="voltarBusca()">← Buscar novamente</button>
+    </div>
+  </div>
+
+  <div class="link-login">
+    Já conhece suas credenciais? <a href="/login.html">Fazer login →</a>
+  </div>
+
+</div>
+
+<script>
+  let _emailSelecionado = '';
+
+  // ── Busca por nome ──────────────────────────────────────
+  async function buscar() {
+    const nome = document.getElementById('inputNome').value.trim();
+    const msg  = document.getElementById('msgBusca');
+    msg.style.display = 'none';
+
+    if (nome.length < 2) {
+      msg.textContent = 'Digite ao menos 2 caracteres do seu nome.';
+      msg.className = 'msg err'; msg.style.display = 'block'; return;
+    }
+
+    const btn = document.getElementById('btnBuscar');
+    const txt = document.getElementById('btnTxt');
+    const sp  = document.getElementById('btnSp');
+    btn.disabled = true; txt.style.display = 'none'; sp.style.display = 'block';
+
+    try {
+      const r = await fetch(`/api/colaborador/buscar?nome=${encodeURIComponent(nome)}`);
+      const d = await r.json();
+
+      if (!r.ok) {
+        msg.textContent = d.erro || 'Nenhuma conta encontrada.';
+        msg.className = 'msg err'; msg.style.display = 'block';
+        btn.disabled=false; txt.style.display='block'; sp.style.display='none';
+        return;
+      }
+
+      const usuarios = d.usuarios || [];
+
+      if (usuarios.length === 1) {
+        // Só um resultado — mostra direto
+        mostrarCredenciais(usuarios[0]);
+      } else {
+        // Múltiplos — deixa escolher
+        mostrarEscolha(usuarios);
+      }
+
+    } catch(e) {
+      msg.textContent = 'Erro de conexão. Tente novamente.';
+      msg.className = 'msg err'; msg.style.display = 'block';
+      btn.disabled=false; txt.style.display='block'; sp.style.display='none';
+    }
+  }
+
+  // ── Múltiplos resultados ────────────────────────────────
+  function mostrarEscolha(lista) {
+    document.getElementById('secBusca').style.display   = 'none';
+    document.getElementById('secEscolha').style.display = 'block';
+
+    const container = document.getElementById('listaResultados');
+    container.innerHTML = lista.map((u, i) => {
+      const modulos = (u.funcoes || []).join(', ');
+      return `<div class="result-item" onclick="mostrarCredenciais(${JSON.stringify(u).replace(/"/g,'&quot;')})">
+        <div class="result-item-avatar">${u.nome.charAt(0).toUpperCase()}</div>
+        <div>
+          <div class="result-item-nome">${u.nome}</div>
+          <div class="result-item-modulos">${modulos}</div>
+        </div>
+        <span class="result-item-seta">›</span>
+      </div>`;
+    }).join('');
+  }
+
+  // ── Mostrar credenciais ──────────────────────────────────
+  function mostrarCredenciais(u) {
+    document.getElementById('secBusca').style.display   = 'none';
+    document.getElementById('secEscolha').style.display = 'none';
+    document.getElementById('secCred').style.display    = 'block';
+
+    _emailSelecionado = u.email;
+
+    document.getElementById('credAvatar').textContent  = u.nome.charAt(0).toUpperCase();
+    document.getElementById('credNome').textContent    = u.nome;
+    document.getElementById('credEmail').textContent   = u.email;
+    document.getElementById('credSenha').textContent   = u.senha;
+
+    const funcoesEl = document.getElementById('credFuncoes');
+    funcoesEl.innerHTML = (u.funcoes || [])
+      .map(f => `<span class="funcao-tag">${f}</span>`)
+      .join('');
+  }
+
+  // ── Copiar ──────────────────────────────────────────────
+  function copiar(id) {
+    const texto = document.getElementById(id).textContent;
+    navigator.clipboard.writeText(texto).then(() => {
+      const btn = event.target;
+      const orig = btn.textContent;
+      btn.textContent = '✔';
+      btn.style.color = '#22c55e';
+      setTimeout(() => { btn.textContent = orig; btn.style.color = ''; }, 1500);
+    });
+  }
+
+  // ── Ir para login ────────────────────────────────────────
+  function irParaLogin() {
+    const url = _emailSelecionado
+      ? `/login.html?email=${encodeURIComponent(_emailSelecionado)}`
+      : '/login.html';
+    window.location.href = url;
+  }
+
+  // ── Voltar ───────────────────────────────────────────────
+  function voltarBusca() {
+    document.getElementById('secBusca').style.display   = 'block';
+    document.getElementById('secEscolha').style.display = 'none';
+    document.getElementById('secCred').style.display    = 'none';
+    const btn = document.getElementById('btnBuscar');
+    btn.disabled = false;
+    document.getElementById('btnTxt').style.display = 'block';
+    document.getElementById('btnSp').style.display  = 'none';
+    document.getElementById('msgBusca').style.display = 'none';
+  }
+
+  // Enter
+  document.getElementById('inputNome').addEventListener('keydown', e => {
+    if (e.key === 'Enter') buscar();
+  });
+
+</script>
+</body>
+</html>

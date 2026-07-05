@@ -1,0 +1,1400 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>FlowProd — Painel Admin</title>
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/@tabler/icons-webfont@latest/tabler-icons.min.css">
+<style>
+*, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+:root {
+  --bg:        #080d14;
+  --surface:   #0d1520;
+  --surface2:  #111e30;
+  --border:    #1a2840;
+  --border2:   #243550;
+  --blue:      #2b7fff;
+  --blue-dk:   #1a5ccc;
+  --blue-glow: rgba(43,127,255,.14);
+  --green:     #22c55e;
+  --red:       #f43f5e;
+  --orange:    #f97316;
+  --amber:     #f59e0b;
+  --purple:    #a855f7;
+  --text:      #e8edf5;
+  --muted:     #6b82a0;
+  --dim:       #3a5070;
+  --sidebar-w: 230px;
+}
+
+body {
+  background: var(--bg);
+  color: var(--text);
+  font-family: 'Inter', sans-serif;
+  min-height: 100vh;
+  display: flex;
+  flex-direction: column;
+}
+
+/* ══ TOPBAR ══════════════════════════════════════════════ */
+.topbar {
+  position: sticky; top: 0; z-index: 50;
+  height: 56px;
+  background: rgba(8,13,20,.95);
+  backdrop-filter: blur(12px);
+  border-bottom: 1px solid var(--border);
+  display: flex; align-items: center;
+  padding: 0 20px; gap: 12px;
+  flex-shrink: 0;
+}
+.topbar-logo {
+  display: flex; align-items: center; gap: 9px;
+  text-decoration: none;
+}
+.logo-icon {
+  width: 32px; height: 32px; border-radius: 8px;
+  background: var(--blue-glow); border: 1px solid rgba(43,127,255,.3);
+  display: flex; align-items: center; justify-content: center;
+  color: var(--blue); font-size: 16px;
+}
+.logo-name {
+  font-size: 16px; font-weight: 700; color: var(--text); letter-spacing: -.3px;
+}
+.logo-name span { color: var(--blue); }
+.topbar-sep { width: 1px; height: 20px; background: var(--border); margin: 0 4px; }
+.topbar-badge {
+  font-size: 10px; font-weight: 600; padding: 3px 10px; border-radius: 20px;
+  background: rgba(43,127,255,.1); border: 1px solid rgba(43,127,255,.2);
+  color: var(--blue); letter-spacing: .5px; text-transform: uppercase;
+}
+.topbar-right { margin-left: auto; display: flex; align-items: center; gap: 10px; }
+
+/* Sino notificações */
+.notif-sino-wrap { position: relative; }
+.notif-sino-btn {
+  background: transparent; border: 1px solid var(--border2);
+  border-radius: 8px; color: var(--muted); cursor: pointer;
+  padding: 6px 10px; font-size: 17px; transition: .2s;
+  position: relative; display: flex; align-items: center;
+}
+.notif-sino-btn:hover { border-color: var(--blue); color: var(--blue); }
+.notif-badge {
+  position: absolute; top: -7px; right: -7px;
+  background: var(--red); color: #fff; font-size: 10px; font-weight: 700;
+  width: 18px; height: 18px; border-radius: 50%;
+  display: none; align-items: center; justify-content: center;
+  border: 2px solid var(--bg);
+}
+.notif-badge.visivel { display: flex; }
+.notif-painel {
+  display: none; position: absolute; top: calc(100% + 10px); right: 0;
+  background: var(--surface); border: 1px solid var(--border);
+  border-radius: 14px; width: 340px; max-height: 420px;
+  z-index: 300; box-shadow: 0 16px 48px rgba(0,0,0,.5);
+  overflow: hidden; flex-direction: column;
+}
+.notif-painel.ativo { display: flex; }
+.notif-painel-header {
+  padding: 13px 16px; border-bottom: 1px solid var(--border);
+  display: flex; align-items: center; justify-content: space-between; flex-shrink: 0;
+}
+.notif-painel-header span { font-size: 13px; font-weight: 600; }
+.notif-painel-actions { display: flex; gap: 6px; align-items: center; }
+.notif-action-btn {
+  background: none; border: 1px solid var(--border2); color: var(--muted);
+  padding: 3px 9px; border-radius: 6px; cursor: pointer;
+  font-size: 11px; font-family: 'Inter', sans-serif; transition: .2s;
+}
+.notif-action-btn:hover { border-color: var(--red); color: var(--red); }
+.notif-painel-close {
+  background: none; border: none; color: var(--muted);
+  cursor: pointer; font-size: 16px; transition: .2s; line-height: 1;
+}
+.notif-painel-close:hover { color: var(--text); }
+.notif-painel-lista { flex: 1; overflow-y: auto; }
+.notif-painel-item {
+  padding: 12px 16px; border-bottom: 1px solid var(--border);
+  display: flex; gap: 10px; align-items: flex-start; transition: .15s; cursor: default;
+}
+.notif-painel-item:hover { background: var(--surface2); }
+.notif-painel-item.nao-lida { background: rgba(43,127,255,.04); }
+.notif-painel-dot {
+  width: 7px; height: 7px; border-radius: 50%;
+  background: var(--blue); flex-shrink: 0; margin-top: 5px;
+}
+.notif-painel-dot.lida { background: transparent; }
+.notif-painel-titulo { font-size: 13px; font-weight: 600; margin-bottom: 2px; }
+.notif-painel-msg { font-size: 12px; color: var(--muted); line-height: 1.5; }
+.notif-painel-tempo { font-size: 11px; color: var(--dim); margin-top: 3px; }
+.notif-painel-vazio { padding: 32px; text-align: center; color: var(--dim); font-size: 13px; }
+
+/* Admin info */
+.admin-info { text-align: right; font-size: 12px; color: var(--muted); }
+.admin-info strong { display: block; color: var(--text); font-size: 13px; font-weight: 500; }
+.btn-logout {
+  padding: 6px 14px; background: transparent; border: 1px solid var(--border2);
+  border-radius: 8px; font-family: 'Inter', sans-serif; font-size: 12px; color: var(--muted);
+  cursor: pointer; transition: .2s; display: flex; align-items: center; gap: 6px;
+}
+.btn-logout:hover { border-color: var(--red); color: var(--red); }
+
+/* ══ LAYOUT PRINCIPAL ════════════════════════════════════ */
+.layout { display: flex; flex: 1; overflow: hidden; }
+
+/* ══ SIDEBAR ════════════════════════════════════════════ */
+.sidebar {
+  width: var(--sidebar-w); flex-shrink: 0;
+  background: var(--surface);
+  border-right: 1px solid var(--border);
+  display: flex; flex-direction: column;
+  padding: 16px 8px;
+  position: sticky; top: 56px;
+  height: calc(100vh - 56px);
+  overflow-y: auto;
+}
+.nav-section { margin-bottom: 4px; }
+.nav-label {
+  font-size: 10px; color: var(--dim); text-transform: uppercase;
+  letter-spacing: .8px; font-weight: 600;
+  padding: 8px 10px 4px;
+}
+.nav-item {
+  display: flex; align-items: center; gap: 9px;
+  padding: 8px 10px; border-radius: 8px;
+  font-size: 13px; color: var(--muted);
+  cursor: pointer; transition: .15s;
+  margin-bottom: 2px; border: 1px solid transparent;
+  position: relative; user-select: none;
+}
+.nav-item:hover { background: var(--surface2); color: var(--text); }
+.nav-item.active {
+  background: rgba(43,127,255,.1);
+  border-color: rgba(43,127,255,.2);
+  color: var(--blue);
+}
+.nav-item i { font-size: 17px; width: 20px; text-align: center; flex-shrink: 0; }
+.nav-item-label { flex: 1; }
+.nav-count {
+  background: var(--blue); color: #fff;
+  font-size: 10px; font-weight: 700;
+  padding: 1px 6px; border-radius: 10px; min-width: 18px; text-align: center;
+  display: none;
+}
+.nav-count.visivel { display: block; }
+.nav-count.red { background: var(--red); }
+
+/* ══ CONTEÚDO PRINCIPAL ══════════════════════════════════ */
+.main-content {
+  flex: 1; overflow-y: auto;
+  padding: 28px 28px;
+  min-width: 0;
+}
+
+/* ══ CABEÇALHO DA PÁGINA ════════════════════════════════ */
+.page-header {
+  display: flex; align-items: flex-start; justify-content: space-between;
+  margin-bottom: 24px; gap: 12px;
+}
+.page-title { font-size: 20px; font-weight: 600; letter-spacing: -.3px; }
+.page-sub { font-size: 13px; color: var(--muted); margin-top: 3px; }
+
+/* ══ FILTROS / TABS INLINE ══════════════════════════════ */
+.filter-bar {
+  display: flex; align-items: center; gap: 6px;
+  margin-bottom: 20px; flex-wrap: wrap;
+}
+.filter-btn {
+  padding: 6px 14px; background: transparent; border: 1px solid var(--border2);
+  border-radius: 8px; font-family: 'Inter', sans-serif; font-size: 12px; font-weight: 500;
+  color: var(--muted); cursor: pointer; transition: .2s;
+  display: flex; align-items: center; gap: 6px;
+}
+.filter-btn:hover { border-color: var(--blue); color: var(--blue); }
+.filter-btn.active { background: rgba(43,127,255,.1); border-color: rgba(43,127,255,.3); color: var(--blue); }
+
+/* ══ TOAST ══════════════════════════════════════════════ */
+.toast {
+  position: fixed; bottom: 24px; right: 24px; z-index: 400;
+  padding: 12px 18px; border-radius: 10px; font-size: 13px; font-weight: 500;
+  display: none; animation: slideUp .3s ease;
+  max-width: 360px; pointer-events: none;
+}
+.toast.ok  { background: rgba(34,197,94,.12); border: 1px solid rgba(34,197,94,.3); color: var(--green); }
+.toast.err { background: rgba(244,63,94,.12); border: 1px solid rgba(244,63,94,.3); color: var(--red); }
+@keyframes slideUp { from { opacity:0; transform: translateY(12px); } to { opacity:1; transform: translateY(0); } }
+
+/* ══ CARDS DE LISTA ══════════════════════════════════════ */
+.section-card {
+  background: var(--surface); border: 1px solid var(--border);
+  border-radius: 14px; overflow: hidden; margin-bottom: 20px;
+}
+.section-card-header {
+  display: flex; align-items: center; justify-content: space-between;
+  padding: 16px 20px; border-bottom: 1px solid var(--border);
+}
+.section-card-title { font-size: 14px; font-weight: 600; display: flex; align-items: center; gap: 8px; }
+.count-badge {
+  font-size: 11px; font-weight: 600; padding: 2px 9px; border-radius: 20px;
+  background: rgba(43,127,255,.1); border: 1px solid rgba(43,127,255,.2); color: var(--blue);
+}
+
+/* Busca */
+.search-wrap {
+  padding: 12px 20px; border-bottom: 1px solid var(--border);
+  position: relative;
+}
+.search-wrap i {
+  position: absolute; left: 32px; top: 50%; transform: translateY(-50%);
+  color: var(--dim); font-size: 15px; pointer-events: none;
+}
+.search-wrap input {
+  width: 100%; background: var(--bg); border: 1px solid var(--border);
+  border-radius: 8px; padding: 8px 12px 8px 34px;
+  color: var(--text); font-family: 'Inter', sans-serif; font-size: 13px; outline: none;
+  transition: border-color .2s;
+}
+.search-wrap input:focus { border-color: var(--blue); }
+.search-wrap input::placeholder { color: var(--dim); }
+
+/* ══ TABELA ══════════════════════════════════════════════ */
+.table-wrap { overflow-x: auto; }
+table { width: 100%; border-collapse: collapse; }
+thead th {
+  padding: 10px 20px; font-size: 11px; font-weight: 600;
+  color: var(--muted); letter-spacing: .5px; text-transform: uppercase;
+  text-align: left; border-bottom: 1px solid var(--border);
+  background: rgba(255,255,255,.01); white-space: nowrap;
+}
+tbody tr { border-bottom: 1px solid var(--border); transition: background .15s; }
+tbody tr:last-child { border-bottom: none; }
+tbody tr:hover { background: rgba(43,127,255,.03); }
+td { padding: 12px 20px; font-size: 13px; vertical-align: middle; }
+
+.user-avatar-cell {
+  width: 34px; height: 34px; border-radius: 50%;
+  background: rgba(43,127,255,.15); border: 1px solid rgba(43,127,255,.2);
+  display: inline-flex; align-items: center; justify-content: center;
+  font-size: 13px; font-weight: 600; color: var(--blue);
+  margin-right: 10px; flex-shrink: 0;
+}
+.user-nome  { font-weight: 500; font-size: 13px; }
+.user-email { font-size: 11px; color: var(--muted); margin-top: 1px; }
+
+.funcoes-badges { display: flex; flex-wrap: wrap; gap: 4px; }
+.badge-funcao {
+  display: inline-flex; align-items: center; gap: 4px;
+  padding: 2px 8px; border-radius: 6px; font-size: 11px; font-weight: 600;
+  letter-spacing: .2px; border: 1px solid; white-space: nowrap;
+}
+
+.badge-status {
+  display: inline-flex; align-items: center; gap: 5px;
+  padding: 3px 10px; border-radius: 20px; font-size: 11px; font-weight: 500;
+  border: 1px solid; white-space: nowrap;
+}
+.badge-status.ativo   { background: rgba(34,197,94,.08);  border-color: rgba(34,197,94,.25);  color: var(--green); }
+.badge-status.inativo { background: rgba(107,130,160,.08); border-color: rgba(107,130,160,.2);  color: var(--muted); }
+
+.acoes { display: flex; align-items: center; gap: 5px; }
+.btn-acao {
+  padding: 5px 10px; background: transparent; border: 1px solid var(--border2);
+  border-radius: 7px; font-family: 'Inter', sans-serif; font-size: 12px; color: var(--muted);
+  cursor: pointer; transition: .2s; white-space: nowrap;
+  display: inline-flex; align-items: center; gap: 4px;
+}
+.btn-acao:hover              { border-color: var(--blue);  color: var(--blue);  }
+.btn-acao.remover:hover      { border-color: var(--red);   color: var(--red);   }
+.btn-acao.ativar:hover       { border-color: var(--green); color: var(--green); }
+.btn-acao.code:hover         { border-color: var(--blue);  color: var(--blue); background: rgba(43,127,255,.08); }
+
+.estado-vazio { padding: 56px 20px; text-align: center; color: var(--muted); }
+.estado-vazio i { font-size: 40px; margin-bottom: 12px; display: block; color: var(--dim); }
+.estado-vazio p { font-size: 13px; }
+.carregando { padding: 40px; text-align: center; color: var(--muted); font-size: 13px; }
+
+/* ══ CARDS SOLICITAÇÕES ══════════════════════════════════ */
+.sol-lista { display: flex; flex-direction: column; gap: 10px; padding: 16px 20px; }
+.sol-card {
+  background: var(--surface2); border: 1px solid var(--border);
+  border-radius: 12px; padding: 16px 20px;
+  display: flex; align-items: center; gap: 16px; transition: border-color .2s;
+}
+.sol-card.pendente { border-left: 3px solid var(--orange); }
+.sol-card.aprovado, .sol-card.aprovada { border-left: 3px solid var(--green); opacity: .75; }
+.sol-card.recusado, .sol-card.recusada { border-left: 3px solid var(--red);   opacity: .65; }
+.sol-avatar {
+  width: 40px; height: 40px; border-radius: 50%; flex-shrink: 0;
+  display: flex; align-items: center; justify-content: center; font-size: 17px;
+}
+.sol-info { flex: 1; min-width: 0; }
+.sol-nome  { font-size: 14px; font-weight: 600; margin-bottom: 2px; }
+.sol-meta  { font-size: 12px; color: var(--muted); }
+.sol-status {
+  font-size: 11px; font-weight: 600; padding: 3px 10px; border-radius: 20px;
+  border: 1px solid; white-space: nowrap; flex-shrink: 0;
+}
+.sol-status.pendente { color: var(--orange); background: rgba(249,115,22,.08); border-color: rgba(249,115,22,.3); }
+.sol-status.aprovado,
+.sol-status.aprovada { color: var(--green);  background: rgba(34,197,94,.08);  border-color: rgba(34,197,94,.3); }
+.sol-status.recusado,
+.sol-status.recusada { color: var(--red);    background: rgba(244,63,94,.08);  border-color: rgba(244,63,94,.3); }
+.sol-acoes { display: flex; gap: 6px; align-items: center; flex-shrink: 0; flex-wrap: wrap; }
+
+.input-nova-senha {
+  background: var(--bg) !important; border: 1px solid var(--border) !important;
+  border-radius: 8px !important; padding: 7px 11px !important;
+  color: var(--text) !important; font-family: 'Inter', sans-serif !important;
+  font-size: 12px !important; outline: none !important; width: 140px !important;
+  transition: border-color .2s !important;
+}
+.input-nova-senha:focus { border-color: var(--blue) !important; }
+
+.btn-aprovar {
+  padding: 6px 14px; background: rgba(34,197,94,.1); border: 1px solid rgba(34,197,94,.3);
+  border-radius: 7px; font-family: 'Inter', sans-serif; font-size: 12px; font-weight: 600;
+  color: var(--green); cursor: pointer; transition: .2s; white-space: nowrap;
+  display: inline-flex; align-items: center; gap: 4px;
+}
+.btn-aprovar:hover { background: rgba(34,197,94,.2); }
+.btn-recusar {
+  padding: 6px 12px; background: transparent; border: 1px solid var(--border2);
+  border-radius: 7px; font-family: 'Inter', sans-serif; font-size: 12px; color: var(--muted);
+  cursor: pointer; transition: .2s; white-space: nowrap;
+  display: inline-flex; align-items: center; gap: 4px;
+}
+.btn-recusar:hover { border-color: var(--red); color: var(--red); }
+.sol-vazio { padding: 56px; text-align: center; color: var(--muted); }
+.sol-vazio i { font-size: 36px; margin-bottom: 10px; display: block; color: var(--dim); }
+
+/* ══ LOGS ════════════════════════════════════════════════ */
+.log-item {
+  background: var(--surface2); border: 1px solid var(--border); border-radius: 10px;
+  padding: 12px 16px; display: flex; align-items: center; gap: 12px;
+  margin-bottom: 8px;
+}
+.log-icon {
+  width: 34px; height: 34px; border-radius: 8px; flex-shrink: 0;
+  background: rgba(43,127,255,.1); border: 1px solid rgba(43,127,255,.15);
+  display: flex; align-items: center; justify-content: center;
+  font-size: 16px; color: var(--blue);
+}
+.log-body { flex: 1; min-width: 0; }
+.log-detalhe { font-size: 13px; font-weight: 500; }
+.log-meta { font-size: 11px; color: var(--muted); margin-top: 2px; }
+
+/* ══ MODAL REMOVER ══════════════════════════════════════ */
+.modal-overlay {
+  display: none; position: fixed; inset: 0; z-index: 200;
+  background: rgba(8,13,20,.85); backdrop-filter: blur(8px);
+  align-items: center; justify-content: center;
+}
+.modal-overlay.open { display: flex; }
+.modal {
+  background: var(--surface); border: 1px solid var(--border2); border-radius: 16px;
+  padding: 32px; width: 100%; max-width: 360px;
+  box-shadow: 0 24px 60px rgba(0,0,0,.5);
+  animation: scaleIn .2s ease;
+}
+@keyframes scaleIn { from { transform: scale(.93); opacity: 0; } to { transform: scale(1); opacity: 1; } }
+.modal-icon-wrap {
+  width: 52px; height: 52px; border-radius: 12px; margin-bottom: 16px;
+  background: rgba(244,63,94,.1); border: 1px solid rgba(244,63,94,.2);
+  display: flex; align-items: center; justify-content: center;
+  color: var(--red); font-size: 24px;
+}
+.modal-titulo { font-size: 17px; font-weight: 600; margin-bottom: 8px; }
+.modal-texto  { font-size: 13px; color: var(--muted); line-height: 1.6; margin-bottom: 22px; }
+.modal-acoes  { display: flex; gap: 10px; }
+.btn-confirmar {
+  flex: 1; padding: 11px; background: var(--red); border: none; border-radius: 9px;
+  font-family: 'Inter', sans-serif; font-size: 13px; font-weight: 600;
+  color: #fff; cursor: pointer; transition: opacity .2s;
+}
+.btn-confirmar:hover { opacity: .85; }
+.btn-cancelar {
+  flex: 1; padding: 11px; background: transparent; border: 1px solid var(--border2);
+  border-radius: 9px; font-family: 'Inter', sans-serif; font-size: 13px; color: var(--muted);
+  cursor: pointer; transition: .2s;
+}
+.btn-cancelar:hover { border-color: var(--text); color: var(--text); }
+
+/* ══ MODAL CONVITE ═══════════════════════════════════════ */
+.convite-overlay {
+  position: fixed; inset: 0; background: rgba(0,0,0,.82);
+  display: flex; align-items: center; justify-content: center; z-index: 300; padding: 16px;
+}
+.convite-box {
+  background: var(--surface); border: 1px solid var(--border);
+  border-radius: 18px; padding: 36px 32px; width: 100%; max-width: 400px;
+  display: flex; flex-direction: column; align-items: center; gap: 16px; text-align: center;
+  animation: scaleIn .2s ease;
+}
+.convite-box h3 { font-size: 18px; font-weight: 600; }
+.convite-box p  { color: var(--muted); font-size: 13px; line-height: 1.6; }
+.convite-codigo {
+  font-family: 'Consolas', monospace; font-size: 28px; font-weight: 800;
+  color: var(--blue); background: var(--bg); padding: 14px 28px;
+  border-radius: 12px; border: 2px solid rgba(43,127,255,.3);
+  letter-spacing: 4px; width: 100%; text-align: center;
+}
+.convite-link {
+  font-size: 12px; color: var(--muted); background: var(--bg); padding: 8px 14px;
+  border-radius: 8px; border: 1px solid var(--border); width: 100%;
+  word-break: break-all; text-align: center;
+}
+.convite-info {
+  background: rgba(245,158,11,.08); border: 1px solid rgba(245,158,11,.2);
+  border-radius: 8px; padding: 10px 14px; font-size: 12px; color: var(--amber);
+  line-height: 1.6; width: 100%; text-align: left;
+}
+.btn-copy-convite {
+  background: none; border: 1px solid var(--border2); color: var(--muted);
+  padding: 8px 16px; border-radius: 8px; cursor: pointer;
+  font-family: 'Inter', sans-serif; font-size: 12px; transition: .2s;
+  display: flex; align-items: center; gap: 5px;
+}
+.btn-copy-convite:hover { border-color: var(--blue); color: var(--blue); }
+.btn-fechar-convite {
+  background: var(--blue); border: none; color: #fff; padding: 11px 32px;
+  border-radius: 9px; cursor: pointer; font-family: 'Inter', sans-serif;
+  font-size: 14px; font-weight: 600; transition: .2s; width: 100%;
+}
+.btn-fechar-convite:hover { background: var(--blue-dk); }
+
+/* ══ MODAL CREDENCIAIS EXECUTOR ══════════════════════════ */
+.mcred-overlay {
+  position: fixed; inset: 0; background: rgba(0,0,0,.82);
+  display: flex; align-items: center; justify-content: center; z-index: 300; padding: 16px;
+}
+.mcred-box {
+  background: var(--surface); border: 1px solid rgba(34,197,94,.2);
+  border-radius: 18px; padding: 36px 32px; width: 100%; max-width: 420px;
+  display: flex; flex-direction: column; gap: 14px; text-align: center;
+  animation: scaleIn .2s ease;
+}
+.mcred-title { font-size: 18px; font-weight: 600; }
+.mcred-sub   { color: var(--muted); font-size: 13px; line-height: 1.6; }
+.mcred-dados {
+  background: var(--bg); border: 1px solid rgba(34,197,94,.2);
+  border-radius: 10px; padding: 16px 20px; text-align: left;
+  display: flex; flex-direction: column; gap: 10px;
+}
+.mcred-row { display: flex; align-items: center; justify-content: space-between; gap: 8px; flex-wrap: wrap; }
+.mcred-label { font-size: 12px; color: var(--muted); }
+.mcred-val {
+  font-family: 'Consolas', monospace; font-size: 13px; font-weight: 600;
+  background: var(--surface); padding: 4px 10px; border-radius: 6px;
+  border: 1px solid var(--border); color: var(--text);
+}
+.mcred-copy {
+  background: none; border: 1px solid var(--border2); color: var(--muted);
+  padding: 3px 9px; border-radius: 5px; cursor: pointer;
+  font-size: 11px; font-family: 'Inter', sans-serif; transition: .2s;
+}
+.mcred-copy:hover { border-color: var(--blue); color: var(--blue); }
+.mcred-aviso {
+  background: rgba(245,158,11,.06); border: 1px solid rgba(245,158,11,.2);
+  border-radius: 8px; padding: 10px 14px; font-size: 12px; color: var(--amber);
+  line-height: 1.6; text-align: left;
+}
+.mcred-btn {
+  background: var(--blue); border: none; border-radius: 9px; color: #fff;
+  padding: 12px; width: 100%; cursor: pointer; font-family: 'Inter', sans-serif;
+  font-size: 14px; font-weight: 600; transition: .2s;
+}
+.mcred-btn:hover { background: var(--blue-dk); }
+
+/* ══ RESPONSIVE ══════════════════════════════════════════ */
+@media (max-width: 768px) {
+  .sidebar { display: none; }
+  .main-content { padding: 16px; }
+}
+</style>
+</head>
+<body>
+
+<!-- ══ TOPBAR ══════════════════════════════════════════════ -->
+<div class="topbar">
+  <a href="/" class="topbar-logo">
+    <div class="logo-icon"><i class="ti ti-settings-automation"></i></div>
+    <span class="logo-name">Flow<span>Prod</span></span>
+  </a>
+  <div class="topbar-sep"></div>
+  <span class="topbar-badge">Admin</span>
+
+  <div class="topbar-right">
+    <!-- Sino notificações -->
+    <div class="notif-sino-wrap">
+      <button class="notif-sino-btn" id="notifSinoBtn" onclick="abrirPainelNotif()">
+        <i class="ti ti-bell"></i>
+        <span class="notif-badge" id="notifBadge">0</span>
+      </button>
+      <div class="notif-painel" id="notifPainel">
+        <div class="notif-painel-header">
+          <span><i class="ti ti-bell" style="margin-right:6px"></i>Notificações</span>
+          <div class="notif-painel-actions">
+            <button class="notif-action-btn" onclick="limparTodasNotifAdmin()">
+              <i class="ti ti-trash"></i> Limpar
+            </button>
+            <button class="notif-painel-close" onclick="fecharPainelNotif()">
+              <i class="ti ti-x"></i>
+            </button>
+          </div>
+        </div>
+        <div class="notif-painel-lista" id="notifPainelLista">
+          <div class="notif-painel-vazio">Nenhuma notificação</div>
+        </div>
+      </div>
+    </div>
+
+    <div class="admin-info">
+      <strong id="adminNome">Carregando...</strong>
+      Administrador
+    </div>
+
+    <button class="btn-logout" onclick="logout()">
+      <i class="ti ti-logout"></i> Sair
+    </button>
+  </div>
+</div>
+
+<!-- ══ LAYOUT ══════════════════════════════════════════════ -->
+<div class="layout">
+
+  <!-- ══ SIDEBAR ══════════════════════════════════════════ -->
+  <div class="sidebar">
+    <div class="nav-section">
+      <div class="nav-label">Executores</div>
+      <div class="nav-item active" id="nav-executores" onclick="mudarAba('executores', this)">
+        <i class="ti ti-users"></i>
+        <span class="nav-item-label">Solicitações</span>
+        <span class="nav-count" id="badgeSolExec">0</span>
+      </div>
+    </div>
+
+    <div class="nav-section">
+      <div class="nav-label">Administração</div>
+      <div class="nav-item" id="nav-senhas" onclick="mudarAba('senhas', this)">
+        <i class="ti ti-key"></i>
+        <span class="nav-item-label">Redefinição de senhas</span>
+        <span class="nav-count red" id="badgeAba">0</span>
+      </div>
+      <div class="nav-item" id="nav-clientes" onclick="mudarAba('clientes', this)">
+        <i class="ti ti-building-store"></i>
+        <span class="nav-item-label">Clientes</span>
+        <span class="nav-count" id="badgeClientes">0</span>
+      </div>
+      <div class="nav-item" id="nav-logs" onclick="mudarAba('logs', this)">
+        <i class="ti ti-clipboard-list"></i>
+        <span class="nav-item-label">Logs de ações</span>
+      </div>
+    </div>
+  </div>
+
+  <!-- ══ CONTEÚDO PRINCIPAL ════════════════════════════════ -->
+  <div class="main-content">
+
+    <!-- ── ABA: SOLICITAÇÕES DE EXECUTORES ─────────────── -->
+    <div id="tab-executores">
+      <div class="page-header">
+        <div>
+          <div class="page-title">Solicitações de colaboradores</div>
+          <div class="page-sub">Gerencie pedidos de acesso ao sistema</div>
+        </div>
+      </div>
+
+      <div class="filter-bar">
+        <button class="filter-btn active" id="sfTodos"    onclick="filtrarSolExec('')">
+          <i class="ti ti-list"></i> Todos
+        </button>
+        <button class="filter-btn" id="sfPendente" onclick="filtrarSolExec('PENDENTE')">
+          <i class="ti ti-clock"></i> Pendentes
+        </button>
+        <button class="filter-btn" id="sfAprovado" onclick="filtrarSolExec('APROVADO')">
+          <i class="ti ti-circle-check"></i> Aprovados
+        </button>
+        <button class="filter-btn" id="sfRecusado" onclick="filtrarSolExec('RECUSADO')">
+          <i class="ti ti-circle-x"></i> Recusados
+        </button>
+      </div>
+
+      <div id="listaSolExec" style="display:flex;flex-direction:column;gap:10px;"></div>
+    </div>
+
+    <!-- ── ABA: REDEFINIÇÃO DE SENHAS ──────────────────── -->
+    <div id="tab-senhas" style="display:none">
+      <div class="page-header">
+        <div>
+          <div class="page-title">Redefinição de senhas</div>
+          <div class="page-sub">Solicitações pendentes de colaboradores</div>
+        </div>
+        <span class="count-badge" id="totalSol">0</span>
+      </div>
+      <div id="solLista" class="sol-lista">
+        <div class="sol-vazio"><i class="ti ti-refresh"></i><p>Carregando...</p></div>
+      </div>
+    </div>
+
+    <!-- ── ABA: CLIENTES ────────────────────────────────── -->
+    <div id="tab-clientes" style="display:none">
+      <div class="page-header">
+        <div>
+          <div class="page-title">Clientes</div>
+          <div class="page-sub">Solicitações de acesso ao portal do cliente</div>
+        </div>
+      </div>
+
+      <div class="filter-bar">
+        <button class="filter-btn active" id="fTodos"    onclick="filtrarClientes('')">
+          <i class="ti ti-list"></i> Todos
+        </button>
+        <button class="filter-btn" id="fPendente" onclick="filtrarClientes('PENDENTE')">
+          <i class="ti ti-clock"></i> Pendentes
+        </button>
+        <button class="filter-btn" id="fAprovado" onclick="filtrarClientes('APROVADO')">
+          <i class="ti ti-circle-check"></i> Aprovados
+        </button>
+        <button class="filter-btn" id="fRecusado" onclick="filtrarClientes('RECUSADO')">
+          <i class="ti ti-circle-x"></i> Recusados
+        </button>
+      </div>
+
+      <div id="listaClientes" style="display:flex;flex-direction:column;gap:10px;margin-top:4px;"></div>
+    </div>
+
+    <!-- ── ABA: LOGS ────────────────────────────────────── -->
+    <div id="tab-logs" style="display:none">
+      <div class="page-header">
+        <div>
+          <div class="page-title">Logs de ações</div>
+          <div class="page-sub">Histórico de ações administrativas</div>
+        </div>
+      </div>
+      <div id="listaLogs"></div>
+    </div>
+
+  </div><!-- /main-content -->
+</div><!-- /layout -->
+
+<!-- Toast -->
+<div class="toast" id="toast"></div>
+
+<!-- Modal remover executor -->
+<div class="modal-overlay" id="modalRemover">
+  <div class="modal">
+    <div class="modal-icon-wrap"><i class="ti ti-trash"></i></div>
+    <div class="modal-titulo">Remover executor?</div>
+    <div class="modal-texto" id="modalTexto">Esta ação não pode ser desfeita.</div>
+    <div class="modal-acoes">
+      <button class="btn-confirmar" id="btnConfirmar">Sim, remover</button>
+      <button class="btn-cancelar" onclick="fecharModal()">Cancelar</button>
+    </div>
+  </div>
+</div>
+
+<!-- Modal convite -->
+<div class="convite-overlay" id="conviteOverlay" style="display:none">
+  <div class="convite-box">
+    <div style="font-size:40px">🎫</div>
+    <h3>Código de convite gerado</h3>
+    <p>Repasse este código ao executor <strong id="conviteNome"></strong>. Ele deve acessar <strong>/primeiro-acesso</strong> e digitá-lo para ver suas credenciais.</p>
+    <div class="convite-codigo" id="conviteCodigo">FP-XXXXXX</div>
+    <div class="convite-link" id="conviteLink"></div>
+    <div class="convite-info">
+      <i class="ti ti-alert-triangle" style="margin-right:5px"></i>
+      Código de uso único. Gere um novo se necessário.
+    </div>
+    <div style="display:flex;gap:8px;width:100%;">
+      <button class="btn-copy-convite" style="flex:1" onclick="copiarConvite()">
+        <i class="ti ti-copy"></i> Copiar código
+      </button>
+      <button class="btn-copy-convite" style="flex:1" onclick="copiarLinkConvite()">
+        <i class="ti ti-link"></i> Copiar link
+      </button>
+    </div>
+    <button class="btn-fechar-convite" onclick="fecharConvite()">Entendido, fechar</button>
+  </div>
+</div>
+
+<!-- Modal credenciais executor -->
+<div class="mcred-overlay" id="modalCredExecutor" style="display:none">
+  <div class="mcred-box">
+    <div style="font-size:44px">🎉</div>
+    <div class="mcred-title" id="mcredTitle">Executor criado!</div>
+    <p class="mcred-sub">Repasse as credenciais abaixo ao colaborador.</p>
+    <div class="mcred-dados">
+      <div class="mcred-row">
+        <span class="mcred-label">Nome:</span>
+        <span class="mcred-val" id="mcredNome">—</span>
+      </div>
+      <div class="mcred-row">
+        <span class="mcred-label">E-mail:</span>
+        <span class="mcred-val" id="mcredEmail">—</span>
+        <button class="mcred-copy" onclick="mcredCopiar('mcredEmail')">Copiar</button>
+      </div>
+      <div class="mcred-row">
+        <span class="mcred-label">Senha:</span>
+        <span class="mcred-val" id="mcredSenha">—</span>
+        <button class="mcred-copy" onclick="mcredCopiar('mcredSenha')">Copiar</button>
+      </div>
+      <div>
+        <div style="font-size:12px;color:var(--muted);margin-bottom:6px;">Módulos:</div>
+        <div id="mcredFuncoes" style="display:flex;flex-wrap:wrap;gap:6px;"></div>
+      </div>
+    </div>
+    <div class="mcred-aviso">
+      <i class="ti ti-alert-triangle" style="margin-right:5px"></i>
+      Informe ao colaborador que ele deve acessar <strong>/colaborador</strong> para verificar sua conta.
+    </div>
+    <button class="mcred-btn" onclick="fecharModalCredExecutor()">Entendido ✔</button>
+  </div>
+</div>
+
+<script>
+// ── Configuração das funções ──────────────────────────────
+const FUNCOES_CONFIG = {
+  FORECAST:  { cor:'#2b7fff', bg:'rgba(43,127,255,.1)',  borda:'rgba(43,127,255,.3)',  icon:'ti-chart-line',  sub:'Previsão' },
+  PMP:       { cor:'#00d4ff', bg:'rgba(0,212,255,.1)',   borda:'rgba(0,212,255,.3)',   icon:'ti-clipboard-list', sub:'Plano Mestre' },
+  MRP:       { cor:'#a855f7', bg:'rgba(168,85,247,.1)',  borda:'rgba(168,85,247,.3)',  icon:'ti-settings-2', sub:'Recursos' },
+  ESTOQUE:   { cor:'#22c55e', bg:'rgba(34,197,94,.1)',   borda:'rgba(34,197,94,.3)',   icon:'ti-package',    sub:'Estoque' },
+  CRP:       { cor:'#f97316', bg:'rgba(249,115,22,.1)',  borda:'rgba(249,115,22,.3)',  icon:'ti-building-factory-2', sub:'Produção' },
+  DASHBOARD: { cor:'#e2c55e', bg:'rgba(226,197,94,.1)',  borda:'rgba(226,197,94,.3)',  icon:'ti-layout-dashboard', sub:'Visão geral' },
+};
+
+let todosUsuarios = [];
+let idParaRemover = null;
+let _filtroSolExec = '';
+let _filtroAtual   = '';
+
+// ── Aba ativa ────────────────────────────────────────────
+function mudarAba(nome, elClicado) {
+  ['tab-executores','tab-senhas','tab-clientes','tab-logs'].forEach(id => {
+    document.getElementById(id).style.display = 'none';
+  });
+  document.querySelectorAll('.nav-item').forEach(el => el.classList.remove('active'));
+
+  document.getElementById('tab-' + nome).style.display = 'block';
+  (elClicado || document.getElementById('nav-' + nome)).classList.add('active');
+
+  if (nome === 'executores') carregarSolExec();
+  if (nome === 'senhas')     carregarSolicitacoes();
+  if (nome === 'clientes')   carregarClientes();
+  if (nome === 'logs')       carregarLogs();
+}
+
+// ── Toast ─────────────────────────────────────────────────
+function mostrarToast(msg, tipo = 'ok') {
+  const el = document.getElementById('toast');
+  el.textContent  = msg;
+  el.className    = `toast ${tipo}`;
+  el.style.display = 'block';
+  setTimeout(() => el.style.display = 'none', 4000);
+}
+
+// ── Auth admin ───────────────────────────────────────────
+async function carregarAdmin() {
+  try {
+    const r = await fetch('/api/me', { credentials:'include', headers:{ 'Accept':'application/json' } });
+    const d = await r.json();
+    if (!r.ok || !d.usuario.funcoes?.includes('ADMIN')) { window.location.href = '/'; return false; }
+    document.getElementById('adminNome').textContent = d.usuario.nome;
+    return true;
+  } catch { window.location.href = '/'; return false; }
+}
+
+// ── Logout ───────────────────────────────────────────────
+async function logout() {
+  await fetch('/api/logout', { method:'POST', credentials:'include' });
+  window.location.href = '/';
+}
+
+// ── Badge pendentes senha ─────────────────────────────────
+async function atualizarBadgePendentes() {
+  try {
+    const r = await fetch('/api/senha/pendentes/contagem', { credentials:'include' });
+    const d = await r.json();
+    const total = d.total || 0;
+    ['badgeAba'].forEach(id => {
+      const el = document.getElementById(id);
+      if (!el) return;
+      el.textContent = total;
+      el.classList.toggle('visivel', total > 0);
+    });
+  } catch {}
+}
+
+// ── Badge clientes pendentes ──────────────────────────────
+async function atualizarBadgeClientes() {
+  try {
+    const r = await fetch('/api/clientes/pendentes/contagem', { credentials:'include' });
+    const d = await r.json();
+    const total = d.total || 0;
+    const badge = document.getElementById('badgeClientes');
+    if (badge) { badge.textContent = total; badge.classList.toggle('visivel', total > 0); }
+  } catch {}
+}
+
+// ── Badge notificações admin ──────────────────────────────
+async function atualizarBadgeNotifAdmin() {
+  try {
+    const r = await fetch('/api/notificacoes/nao-lidas/contagem', { credentials:'include' });
+    const d = await r.json();
+    const total = d.total || 0;
+    const badge = document.getElementById('notifBadge');
+    if (badge) { badge.textContent = total; badge.classList.toggle('visivel', total > 0); }
+  } catch {}
+}
+
+// ── Badge solicitações executor ───────────────────────────
+async function atualizarBadgeSolExec() {
+  try {
+    const r = await fetch('/api/solicitacoes-executor/pendentes/contagem', { credentials:'include' });
+    const d = await r.json();
+    const total = d.total || 0;
+    const el = document.getElementById('badgeSolExec');
+    if (el) { el.textContent = total; el.classList.toggle('visivel', total > 0); }
+  } catch {}
+}
+
+// ── Solicitações de executores ────────────────────────────
+async function carregarSolExec(filtro) {
+  if (filtro !== undefined) _filtroSolExec = filtro;
+  const container = document.getElementById('listaSolExec');
+  container.innerHTML = '<p style="color:var(--muted);font-size:13px;padding:8px 0;">Carregando...</p>';
+  try {
+    const url = _filtroSolExec ? `/api/solicitacoes-executor?status=${_filtroSolExec}` : '/api/solicitacoes-executor';
+    const r = await fetch(url, { credentials:'include' });
+    const d = await r.json();
+    const lista = d.solicitacoes || [];
+
+    if (!lista.length) {
+      container.innerHTML = `
+        <div class="sol-vazio">
+          <i class="ti ti-users"></i>
+          <p>Nenhuma solicitação encontrada.</p>
+        </div>`;
+      return;
+    }
+
+    container.innerHTML = lista.map(s => {
+      const sColor = s.status==='APROVADO' ? 'var(--green)' : s.status==='RECUSADO' ? 'var(--red)' : 'var(--orange)';
+      const sLabel = s.status==='APROVADO' ? 'Aprovado' : s.status==='RECUSADO' ? 'Recusado' : 'Pendente';
+      const sClass = s.status.toLowerCase();
+      const isPendente = s.status === 'PENDENTE';
+
+      const funcoesBadges = (s.funcoes||[]).map(f => {
+        const cfg = FUNCOES_CONFIG[f] || { cor:'#6b82a0', bg:'rgba(107,130,160,.1)', borda:'rgba(107,130,160,.3)' };
+        return `<span class="badge-funcao" style="color:${cfg.cor};background:${cfg.bg};border-color:${cfg.borda}">${f}</span>`;
+      }).join('');
+
+      const inicial = s.nome.charAt(0).toUpperCase();
+      const nomeSafe = s.nome.replace(/'/g, "\\'");
+
+      return `
+        <div class="sol-card ${sClass}">
+          <div class="sol-avatar" style="background:rgba(43,127,255,.12);color:var(--blue);font-weight:700;font-size:15px;">
+            ${inicial}
+          </div>
+          <div class="sol-info">
+            <div class="sol-nome">${s.nome}</div>
+            <div class="sol-meta">${s.email} · ${new Date(s.criado_em).toLocaleDateString('pt-BR')}</div>
+            <div style="display:flex;flex-wrap:wrap;gap:4px;margin-top:6px;">${funcoesBadges}</div>
+          </div>
+          <span class="sol-status ${sClass}">${sLabel}</span>
+          ${isPendente ? `
+          <div class="sol-acoes">
+            <button class="btn-aprovar" onclick="aprovarSolExec(${s.id},'${nomeSafe}','${s.email}')">
+              <i class="ti ti-check"></i> Aprovar
+            </button>
+            <button class="btn-recusar" onclick="recusarSolExec(${s.id},'${nomeSafe}')">
+              <i class="ti ti-x"></i> Recusar
+            </button>
+          </div>` : `
+          <button class="btn-acao remover" onclick="removerSolExec(${s.id},'${nomeSafe}')">
+            <i class="ti ti-trash"></i>
+          </button>`}
+        </div>`;
+    }).join('');
+  } catch {
+    container.innerHTML = '<p style="color:var(--red);font-size:13px;">Erro ao carregar solicitações.</p>';
+  }
+}
+
+function filtrarSolExec(status) {
+  _filtroSolExec = status;
+  ['sfTodos','sfPendente','sfAprovado','sfRecusado'].forEach(id => document.getElementById(id)?.classList.remove('active'));
+  const map = { '':'sfTodos', 'PENDENTE':'sfPendente', 'APROVADO':'sfAprovado', 'RECUSADO':'sfRecusado' };
+  document.getElementById(map[status])?.classList.add('active');
+  carregarSolExec(status);
+}
+
+async function aprovarSolExec(id, nome, email) {
+  if (!confirm(`Aprovar a solicitação de "${nome}"?\n\nIsso criará a conta de executor com a senha escolhida pelo colaborador.`)) return;
+  try {
+    const r = await fetch(`/api/solicitacoes-executor/${id}/aprovar`, { method:'POST', credentials:'include' });
+    const d = await r.json();
+    if (r.ok) {
+      mostrarToast(`✅ Conta de ${nome} criada!`, 'ok');
+      carregarSolExec(); atualizarBadgeSolExec();
+    } else {
+      mostrarToast(d.erro || 'Erro ao aprovar.', 'err');
+    }
+  } catch { mostrarToast('Erro ao aprovar.', 'err'); }
+}
+
+async function recusarSolExec(id, nome) {
+  if (!confirm(`Recusar a solicitação de "${nome}"?`)) return;
+  try {
+    const r = await fetch(`/api/solicitacoes-executor/${id}/recusar`, { method:'POST', credentials:'include' });
+    const d = await r.json();
+    mostrarToast(d.mensagem || d.erro, r.ok ? 'ok' : 'err');
+    if (r.ok) { carregarSolExec(); atualizarBadgeSolExec(); }
+  } catch { mostrarToast('Erro ao recusar.', 'err'); }
+}
+
+async function removerSolExec(id, nome) {
+  if (!confirm(`Remover o registro de "${nome}" permanentemente?\n\nIsso apagará a solicitação e o usuário do sistema caso já tenha sido aprovado.`)) return;
+  try {
+    // 1. Busca o email da solicitação para poder remover o usuário vinculado
+    const rSol = await fetch(`/api/solicitacoes-executor`, { credentials:'include' });
+    const dSol = await rSol.json();
+    const sol  = (dSol.solicitacoes || []).find(s => s.id === id);
+
+    // 2. Se a solicitação foi aprovada, remove o usuário correspondente da tabela usuarios
+    if (sol && sol.status === 'APROVADO' && sol.email) {
+      await fetch(`/api/usuarios/por-email/${encodeURIComponent(sol.email)}`, {
+        method: 'DELETE', credentials: 'include'
+      }).catch(() => {}); // ignora erro se não existir na tabela usuarios
+    }
+
+    // 3. Remove o registro da solicitacao_executor
+    const r = await fetch(`/api/solicitacoes-executor/${id}`, { method:'DELETE', credentials:'include' });
+    const d = await r.json();
+    if (r.ok) {
+      mostrarToast(`Registro de ${nome} removido.`, 'ok');
+      carregarSolExec();
+    } else {
+      mostrarToast(d.erro || 'Erro ao remover.', 'err');
+    }
+  } catch { mostrarToast('Erro ao remover.', 'err'); }
+}
+
+// ── Solicitações de senha ─────────────────────────────────
+async function carregarSolicitacoes() {
+  const lista = document.getElementById('solLista');
+  const total = document.getElementById('totalSol');
+  lista.innerHTML = '<div class="sol-vazio"><i class="ti ti-refresh"></i><p>Carregando...</p></div>';
+  try {
+    const r = await fetch('/api/senha/solicitacoes', { credentials:'include' });
+    const d = await r.json();
+    const sols = d.solicitacoes || [];
+    total.textContent = `${sols.length}`;
+
+    if (!sols.length) {
+      lista.innerHTML = '<div class="sol-vazio"><i class="ti ti-circle-check" style="color:var(--green)"></i><p>Nenhuma solicitação pendente.</p></div>';
+      return;
+    }
+
+    lista.innerHTML = sols.map(s => {
+      const sClass    = s.status.toLowerCase();
+      const isPend    = s.status === 'PENDENTE';
+      const data      = new Date(s.criado_em).toLocaleString('pt-BR');
+      const nomeSafe  = s.nome.replace(/'/g, "\\'");
+
+      return `
+        <div class="sol-card ${sClass}" id="sol-${s.id}">
+          <div class="sol-avatar" style="background:rgba(43,127,255,.1);font-size:18px;">
+            ${isPend ? '🔑' : s.status === 'APROVADA' ? '✅' : '❌'}
+          </div>
+          <div class="sol-info">
+            <div class="sol-nome">${s.nome}</div>
+            <div class="sol-meta">${s.email} · ${data}</div>
+          </div>
+          <span class="sol-status ${sClass}">${s.status}</span>
+          ${isPend ? `
+          <div class="sol-acoes">
+            <input id="novaSenha-${s.id}" type="password" class="input-nova-senha" placeholder="Nova senha...">
+            <button class="btn-aprovar" onclick="aprovarSenha(${s.id},'${nomeSafe}')">
+              <i class="ti ti-check"></i> Aprovar
+            </button>
+            <button class="btn-recusar" onclick="recusarSenha(${s.id},'${nomeSafe}')">
+              <i class="ti ti-x"></i> Recusar
+            </button>
+          </div>` : ''}
+        </div>`;
+    }).join('');
+  } catch {
+    lista.innerHTML = '<div class="sol-vazio"><p>Erro ao carregar.</p></div>';
+  }
+}
+
+async function aprovarSenha(id, nome) {
+  const inp = document.getElementById(`novaSenha-${id}`);
+  const nov = inp.value.trim();
+  if (!nov || nov.length < 6) {
+    inp.style.borderColor = 'var(--red)'; inp.placeholder = 'Mín. 6 caracteres!';
+    setTimeout(() => { inp.style.borderColor=''; inp.placeholder='Nova senha...'; }, 1600);
+    return;
+  }
+  try {
+    const r = await fetch(`/api/senha/aprovar/${id}`, {
+      method:'POST', headers:{'Content-Type':'application/json'},
+      credentials:'include', body: JSON.stringify({ nova_senha: nov })
+    });
+    const d = await r.json();
+    if (r.ok) {
+      const card = document.getElementById(`sol-${id}`);
+      card.classList.replace('pendente','aprovada');
+      card.querySelector('.sol-status').className   = 'sol-status aprovada';
+      card.querySelector('.sol-status').textContent = 'APROVADA';
+      card.querySelector('.sol-avatar').textContent = '✅';
+      card.querySelector('.sol-acoes').innerHTML =
+        `<span style="font-size:12px;color:var(--green)">✅ Senha redefinida com sucesso</span>`;
+      await atualizarBadgePendentes();
+      if (d.usuario_id) await enviarNotifAlteracaoSenha(d.usuario_id, nome);
+      else { const u = (todosUsuarios||[]).find(x => x.nome === nome); if (u) await enviarNotifAlteracaoSenha(u.id, nome); }
+      if (d.usuario_id) gerarConvite(d.usuario_id, nome);
+      else { const u = (todosUsuarios||[]).find(x => x.nome === nome); if (u) gerarConvite(u.id, nome); }
+    } else { alert(d.erro || 'Erro ao aprovar.'); }
+  } catch { alert('Erro de conexão.'); }
+}
+
+async function enviarNotifAlteracaoSenha(usuarioId, nome) {
+  try {
+    await fetch('/api/notificacoes/enviar-teste', {
+      method:'POST', headers:{'Content-Type':'application/json'},
+      credentials:'include',
+      body: JSON.stringify({
+        usuario_id: usuarioId, tipo: 'senha_alterada',
+        titulo: '🔑 Sua senha foi alterada',
+        mensagem: `Olá ${nome}! Sua senha de acesso foi redefinida pelo administrador.`
+      })
+    });
+  } catch {}
+}
+
+async function recusarSenha(id, nome) {
+  if (!confirm(`Recusar a solicitação de "${nome}"?`)) return;
+  try {
+    const r = await fetch(`/api/senha/recusar/${id}`, { method:'POST', credentials:'include' });
+    const d = await r.json();
+    if (r.ok) {
+      const card = document.getElementById(`sol-${id}`);
+      card.classList.replace('pendente','recusada');
+      card.querySelector('.sol-status').className   = 'sol-status recusada';
+      card.querySelector('.sol-status').textContent = 'RECUSADA';
+      card.querySelector('.sol-avatar').textContent = '❌';
+      card.querySelector('.sol-acoes')?.remove();
+      await atualizarBadgePendentes();
+    } else { alert(d.erro || 'Erro ao recusar.'); }
+  } catch { alert('Erro de conexão.'); }
+}
+
+// ── Clientes ──────────────────────────────────────────────
+async function carregarClientes(filtro) {
+  if (filtro !== undefined) _filtroAtual = filtro;
+  const container = document.getElementById('listaClientes');
+  container.innerHTML = '<p style="color:var(--muted);font-size:13px;">Carregando...</p>';
+  try {
+    const url = _filtroAtual ? `/api/clientes?status=${_filtroAtual}` : '/api/clientes';
+    const r = await fetch(url, { credentials:'include' });
+    const d = await r.json();
+    const clientes = d.clientes || [];
+
+    if (!clientes.length) {
+      container.innerHTML = '<div class="sol-vazio"><i class="ti ti-building-store"></i><p>Nenhuma solicitação de cliente ainda.</p></div>';
+      return;
+    }
+
+    container.innerHTML = clientes.map(c => {
+      const isPend  = c.status === 'PENDENTE';
+      const sClass  = c.status.toLowerCase();
+      const sLabel  = c.status === 'APROVADO' ? 'Aprovado' : c.status === 'RECUSADO' ? 'Recusado' : 'Pendente';
+      const msgInt  = c.mensagem_interesse
+        ? `<div style="font-size:11px;color:var(--dim);margin-top:4px;font-style:italic;">"${c.mensagem_interesse}"</div>`
+        : '';
+
+      return `
+        <div class="sol-card ${sClass}">
+          <div class="sol-avatar" style="background:rgba(6,182,212,.12);color:#06b6d4;font-weight:700;font-size:15px;">
+            ${c.nome.charAt(0).toUpperCase()}
+          </div>
+          <div class="sol-info">
+            <div class="sol-nome">${c.nome}</div>
+            <div class="sol-meta">
+              ${c.email}${c.empresa ? ' · ' + c.empresa : ''}${c.telefone ? ' · ' + c.telefone : ''}
+              · ${new Date(c.criado_em).toLocaleDateString('pt-BR')}
+            </div>
+            ${msgInt}
+          </div>
+          <span class="sol-status ${sClass}">${sLabel}</span>
+          ${isPend ? `
+          <div class="sol-acoes">
+            <input type="password" id="senhaCliente${c.id}" placeholder="Definir senha (mín. 6)"
+              style="background:var(--bg);border:1px solid var(--border);border-radius:8px;color:var(--text);
+                font-family:'Inter',sans-serif;font-size:12px;padding:7px 10px;outline:none;width:160px;">
+            <button class="btn-aprovar" onclick="aprovarCliente(${c.id})">
+              <i class="ti ti-check"></i> Aprovar
+            </button>
+            <button class="btn-recusar" onclick="recusarCliente(${c.id})">
+              <i class="ti ti-x"></i> Recusar
+            </button>
+          </div>` : `
+          <button class="btn-acao remover" onclick="removerCliente(${c.id})">
+            <i class="ti ti-trash"></i>
+          </button>`}
+        </div>`;
+    }).join('');
+  } catch {
+    container.innerHTML = '<p style="color:var(--red);font-size:13px;">Erro ao carregar clientes.</p>';
+  }
+}
+
+function filtrarClientes(status) {
+  _filtroAtual = status;
+  ['fTodos','fPendente','fAprovado','fRecusado'].forEach(id => document.getElementById(id)?.classList.remove('active'));
+  const map = { '':'fTodos', 'PENDENTE':'fPendente', 'APROVADO':'fAprovado', 'RECUSADO':'fRecusado' };
+  document.getElementById(map[status])?.classList.add('active');
+  carregarClientes(status);
+}
+
+async function aprovarCliente(id) {
+  const senhaInput = document.getElementById('senhaCliente' + id);
+  const senha = senhaInput ? senhaInput.value.trim() : '';
+  if (!senha || senha.length < 6) {
+    senhaInput && (senhaInput.style.borderColor = 'var(--red)');
+    mostrarToast('Defina uma senha de acesso (mín. 6 caracteres).', 'err');
+    return;
+  }
+  try {
+    const r = await fetch(`/api/clientes/aprovar/${id}`, {
+      method:'POST', credentials:'include',
+      headers:{'Content-Type':'application/json'},
+      body: JSON.stringify({ senha })
+    });
+    const d = await r.json();
+    if (r.ok) {
+      mostrarToast(`✅ ${d.mensagem}`, 'ok');
+      carregarClientes(); atualizarBadgeClientes(); atualizarBadgeNotifAdmin();
+    } else { mostrarToast(d.erro || 'Erro ao aprovar.', 'err'); }
+  } catch { mostrarToast('Erro ao aprovar.', 'err'); }
+}
+
+async function recusarCliente(id) {
+  if (!confirm('Recusar esta solicitação?')) return;
+  try {
+    const r = await fetch(`/api/clientes/recusar/${id}`, { method:'POST', credentials:'include' });
+    const d = await r.json();
+    mostrarToast(d.mensagem || d.erro, r.ok ? 'ok' : 'err');
+    if (r.ok) { carregarClientes(); atualizarBadgeClientes(); }
+  } catch { mostrarToast('Erro ao recusar.', 'err'); }
+}
+
+async function removerCliente(id) {
+  if (!confirm('Remover este cliente permanentemente?')) return;
+  try {
+    const r = await fetch(`/api/clientes/${id}`, { method:'DELETE', credentials:'include' });
+    const d = await r.json();
+    mostrarToast(d.mensagem || d.erro, r.ok ? 'ok' : 'err');
+    if (r.ok) carregarClientes();
+  } catch { mostrarToast('Erro ao remover.', 'err'); }
+}
+
+// ── Logs ──────────────────────────────────────────────────
+async function carregarLogs() {
+  const container = document.getElementById('listaLogs');
+  container.innerHTML = '<p style="color:var(--muted);font-size:13px;">Carregando...</p>';
+  try {
+    const r = await fetch('/api/clientes/logs', { credentials:'include' });
+    const d = await r.json();
+    const logs = d.logs || [];
+    if (!logs.length) {
+      container.innerHTML = '<div class="sol-vazio"><i class="ti ti-clipboard-list"></i><p>Nenhuma ação registrada ainda.</p></div>';
+      return;
+    }
+    const icones = {
+      'CRIAR_EXECUTOR':'ti-user-plus', 'REMOVER_EXECUTOR':'ti-trash', 'ATIVAR_EXECUTOR':'ti-circle-check',
+      'DESATIVAR_EXECUTOR':'ti-circle-pause', 'APROVAR_CLIENTE':'ti-circle-check', 'RECUSAR_CLIENTE':'ti-circle-x',
+      'REMOVER_CLIENTE':'ti-trash', 'REDEFINIR_SENHA':'ti-key', 'RECUSAR_SENHA':'ti-circle-x',
+    };
+    container.innerHTML = logs.map(l => {
+      const icon  = icones[l.acao] || 'ti-clipboard-list';
+      const tempo = new Date(l.criado_em).toLocaleString('pt-BR');
+      return `
+        <div class="log-item">
+          <div class="log-icon"><i class="ti ${icon}"></i></div>
+          <div class="log-body">
+            <div class="log-detalhe">${l.detalhes || l.acao}</div>
+            <div class="log-meta">por <strong style="color:var(--muted)">${l.admin_nome || 'Admin'}</strong> · ${tempo}</div>
+          </div>
+        </div>`;
+    }).join('');
+  } catch {
+    container.innerHTML = '<p style="color:var(--red);font-size:13px;">Erro ao carregar logs.</p>';
+  }
+}
+
+// ── Modal remover ─────────────────────────────────────────
+function confirmarRemover(id, nome) {
+  idParaRemover = id;
+  document.getElementById('modalTexto').textContent = `Tem certeza que deseja remover "${nome}"? Esta ação não pode ser desfeita.`;
+  document.getElementById('modalRemover').classList.add('open');
+}
+function fecharModal() {
+  document.getElementById('modalRemover').classList.remove('open');
+  idParaRemover = null;
+}
+document.getElementById('btnConfirmar').addEventListener('click', async () => {
+  if (!idParaRemover) return;
+  try {
+    const r = await fetch(`/api/usuarios/${idParaRemover}`, { method:'DELETE', credentials:'include' });
+    fecharModal();
+    if (r.ok) { mostrarToast('Executor removido.', 'ok'); carregarSolExec(); }
+  } catch {}
+});
+document.getElementById('modalRemover').addEventListener('click', e => {
+  if (e.target === document.getElementById('modalRemover')) fecharModal();
+});
+document.addEventListener('keydown', e => { if (e.key === 'Escape') fecharModal(); });
+
+// ── Convite ───────────────────────────────────────────────
+async function gerarConvite(usuarioId, nomeUsuario) {
+  try {
+    const r = await fetch('/api/convites/gerar', {
+      method:'POST', credentials:'include',
+      headers:{'Content-Type':'application/json'},
+      body: JSON.stringify({ usuario_id: usuarioId })
+    });
+    const d = await r.json();
+    if (!r.ok) { mostrarToast(d.erro || 'Erro ao gerar convite.', 'err'); return; }
+    document.getElementById('conviteNome').textContent   = nomeUsuario || d.usuario?.nome || '';
+    document.getElementById('conviteCodigo').textContent = d.codigo;
+    const link = `${window.location.origin}/primeiro-acesso.html?codigo=${d.codigo}`;
+    document.getElementById('conviteLink').textContent   = link;
+    document.getElementById('conviteOverlay').style.display = 'flex';
+  } catch { mostrarToast('Erro ao gerar convite.', 'err'); }
+}
+function fecharConvite()    { document.getElementById('conviteOverlay').style.display = 'none'; }
+function copiarConvite()    { navigator.clipboard.writeText(document.getElementById('conviteCodigo').textContent).then(() => mostrarToast('Código copiado!', 'ok')); }
+function copiarLinkConvite(){ navigator.clipboard.writeText(document.getElementById('conviteLink').textContent).then(() => mostrarToast('Link copiado!', 'ok')); }
+
+// ── Modal credenciais ─────────────────────────────────────
+function mostrarModalCredenciais(d) {
+  document.getElementById('mcredTitle').textContent  = `✅ ${d.nome} criado!`;
+  document.getElementById('mcredNome').textContent   = d.nome  || '—';
+  document.getElementById('mcredEmail').textContent  = d.email || '—';
+  document.getElementById('mcredSenha').textContent  = d.senha || '—';
+  const fc = document.getElementById('mcredFuncoes');
+  fc.innerHTML = (d.funcoes||[]).map(f =>
+    `<span style="padding:3px 10px;border-radius:5px;font-size:11px;font-weight:600;
+      background:rgba(43,127,255,.12);color:var(--blue);border:1px solid rgba(43,127,255,.2);">${f}</span>`
+  ).join('');
+  document.getElementById('modalCredExecutor').style.display = 'flex';
+}
+function fecharModalCredExecutor() { document.getElementById('modalCredExecutor').style.display = 'none'; }
+function mcredCopiar(id) {
+  const texto = document.getElementById(id).textContent;
+  navigator.clipboard.writeText(texto).then(() => {
+    const btn = event.target;
+    const orig = btn.textContent;
+    btn.textContent = '✔'; btn.style.color = 'var(--green)';
+    setTimeout(() => { btn.textContent = orig; btn.style.color = ''; }, 1500);
+  });
+}
+
+// ── Notificações painel ───────────────────────────────────
+function abrirPainelNotif() {
+  const p = document.getElementById('notifPainel');
+  p.classList.toggle('ativo');
+  if (p.classList.contains('ativo')) carregarNotifAdmin();
+}
+function fecharPainelNotif() { document.getElementById('notifPainel').classList.remove('ativo'); }
+document.addEventListener('click', e => {
+  const wrap = document.querySelector('.notif-sino-wrap');
+  if (wrap && !wrap.contains(e.target)) fecharPainelNotif();
+});
+
+async function carregarNotifAdmin() {
+  const c = document.getElementById('notifPainelLista');
+  if (!c) return;
+  c.innerHTML = '<p style="color:var(--muted);font-size:13px;padding:12px;">Carregando...</p>';
+  try {
+    const r = await fetch('/api/notificacoes', { credentials:'include' });
+    const d = await r.json();
+    const lista = d.notificacoes || [];
+    if (!lista.length) { c.innerHTML = '<div class="notif-painel-vazio">Nenhuma notificação</div>'; return; }
+    c.innerHTML = lista.map(n => `
+      <div class="notif-painel-item ${!n.lida ? 'nao-lida' : ''}">
+        <div class="notif-painel-dot ${n.lida ? 'lida' : ''}"></div>
+        <div>
+          <div class="notif-painel-titulo">${n.titulo}</div>
+          ${n.mensagem ? `<div class="notif-painel-msg">${n.mensagem}</div>` : ''}
+          <div class="notif-painel-tempo">${new Date(n.criado_em).toLocaleString('pt-BR')}</div>
+        </div>
+      </div>`).join('');
+  } catch { c.innerHTML = '<p style="color:var(--red);font-size:13px;padding:12px;">Erro ao carregar.</p>'; }
+}
+
+async function limparTodasNotifAdmin() {
+  if (!confirm('Apagar todas as notificações?')) return;
+  try {
+    const r = await fetch('/api/notificacoes/todas', { method:'DELETE', credentials:'include' });
+    if (r.ok) {
+      document.getElementById('notifPainelLista').innerHTML = '<div class="notif-painel-vazio">Nenhuma notificação</div>';
+      const badge = document.getElementById('notifBadge');
+      if (badge) { badge.textContent = '0'; badge.classList.remove('visivel'); }
+      mostrarToast('Notificações apagadas.', 'ok');
+    }
+  } catch { mostrarToast('Erro ao apagar notificações.', 'err'); }
+}
+
+function adicionarNotifAoPainel(notif) {
+  const lista = document.getElementById('notifPainelLista');
+  if (lista.innerHTML.includes('Nenhuma notificação')) lista.innerHTML = '';
+  const item = document.createElement('div');
+  item.className = 'notif-painel-item nao-lida';
+  item.innerHTML = `
+    <div class="notif-painel-dot"></div>
+    <div>
+      <div class="notif-painel-titulo">${notif.titulo || 'Notificação'}</div>
+      <div class="notif-painel-msg">${notif.mensagem || ''}</div>
+      <div class="notif-painel-tempo">agora</div>
+    </div>`;
+  lista.insertBefore(item, lista.firstChild);
+}
+
+// ── SSE ───────────────────────────────────────────────────
+function conectarSSE() {
+  const eventSource = new EventSource('/api/notificacoes/stream', { withCredentials: true });
+  eventSource.addEventListener('message', e => {
+    try {
+      const notif = JSON.parse(e.data);
+      adicionarNotifAoPainel(notif);
+      atualizarBadgeNotifAdmin();
+    } catch {}
+  });
+  eventSource.addEventListener('error', () => {
+    eventSource.close();
+    setTimeout(conectarSSE, 5000);
+  });
+}
+
+// ── Init ──────────────────────────────────────────────────
+(async () => {
+  const ok = await carregarAdmin();
+  if (!ok) return;
+  carregarSolExec();
+  atualizarBadgePendentes();
+  atualizarBadgeClientes();
+  atualizarBadgeNotifAdmin();
+  atualizarBadgeSolExec();
+  setInterval(atualizarBadgeNotifAdmin, 30000);
+  setInterval(atualizarBadgePendentes,  30000);
+  setInterval(atualizarBadgeSolExec,    30000);
+  conectarSSE();
+})();
+</script>
+</body>
+</html>

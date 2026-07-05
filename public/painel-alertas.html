@@ -1,0 +1,255 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>FlowProd — Painel de Alertas</title>
+<link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+<style>
+  :root{
+    --bg:#080d14;--surface:#0d1520;--border:#1a2740;
+    --text:#e8edf5;--muted:#6b82a0;--dim:#3a5070;
+    --blue:#2b7fff;--blue-dk:#1a5ccc;
+    --green:#22c55e;--error:#f43f5e;--amber:#f59e0b;
+  }
+  *{box-sizing:border-box;margin:0;padding:0;}
+  body{
+    background:var(--bg);color:var(--text);font-family:'Poppins',sans-serif;
+    min-height:100vh;display:flex;flex-direction:column;
+  }
+
+  /* ── Topbar ── */
+  .topbar{
+    background:var(--surface);border-bottom:1px solid var(--border);
+    padding:0 32px;height:58px;
+    display:flex;align-items:center;justify-content:space-between;
+    flex-shrink:0;
+  }
+  .topbar-left{display:flex;align-items:center;gap:12px;}
+  .logo{font-size:17px;font-weight:700;color:var(--blue);letter-spacing:1px;}
+  .divider-v{width:1px;height:22px;background:var(--border);}
+  .page-title{font-size:13px;color:var(--muted);}
+  .topbar-right{display:flex;align-items:center;gap:10px;}
+  .btn-admin{
+    background:var(--blue);border:none;border-radius:7px;color:#fff;
+    padding:7px 16px;font-size:13px;font-weight:600;cursor:pointer;
+    font-family:'Poppins',sans-serif;text-decoration:none;
+    display:inline-flex;align-items:center;gap:6px;
+  }
+  .btn-voltar{
+    background:none;border:1px solid var(--border);border-radius:7px;color:var(--muted);
+    padding:7px 16px;font-size:13px;cursor:pointer;font-family:'Poppins',sans-serif;
+    text-decoration:none;transition:.2s;
+  }
+  .btn-voltar:hover{border-color:var(--blue);color:var(--blue);}
+
+  /* ── Bloqueio (não-admin) ── */
+  #telaBloqueio{
+    flex:1;display:flex;flex-direction:column;align-items:center;
+    justify-content:center;gap:16px;text-align:center;padding:32px;
+  }
+  #telaBloqueio .icone{font-size:64px;}
+  #telaBloqueio h2{font-size:22px;font-weight:700;}
+  #telaBloqueio p{color:var(--muted);font-size:14px;line-height:1.7;max-width:380px;}
+
+  /* ── Conteúdo principal ── */
+  #telaAlertas{display:none;flex:1;padding:32px;max-width:900px;width:100%;margin:0 auto;}
+
+  .secao-titulo{
+    font-size:14px;font-weight:700;color:var(--muted);
+    text-transform:uppercase;letter-spacing:1px;
+    margin-bottom:14px;display:flex;align-items:center;gap:8px;
+  }
+  .secao{margin-bottom:36px;}
+
+  .card-alerta{
+    background:var(--surface);border:1px solid var(--border);border-radius:10px;
+    padding:16px 20px;display:flex;align-items:center;gap:14px;margin-bottom:8px;
+  }
+  .card-alerta-avatar{
+    width:38px;height:38px;border-radius:50%;
+    display:flex;align-items:center;justify-content:center;
+    font-size:16px;font-weight:700;flex-shrink:0;
+  }
+  .avatar-cliente{background:linear-gradient(135deg,#0e7490,#06b6d4);}
+  .avatar-senha{background:linear-gradient(135deg,#1a5ccc,#2b7fff);}
+  .card-alerta-info{flex:1;}
+  .card-alerta-nome{font-size:14px;font-weight:600;}
+  .card-alerta-sub{font-size:12px;color:var(--muted);margin-top:2px;}
+  .card-alerta-tempo{font-size:11px;color:var(--dim);margin-top:4px;}
+
+  .badge-pend{
+    padding:3px 10px;border-radius:5px;font-size:11px;font-weight:700;
+    background:rgba(245,158,11,.12);color:var(--amber);border:1px solid rgba(245,158,11,.2);
+    white-space:nowrap;
+  }
+
+  .vazio{
+    background:var(--surface);border:1px solid var(--border);border-radius:10px;
+    padding:28px;text-align:center;color:var(--dim);font-size:13px;
+  }
+
+  .resumo-bar{
+    display:flex;gap:16px;margin-bottom:28px;flex-wrap:wrap;
+  }
+  .resumo-item{
+    background:var(--surface);border:1px solid var(--border);border-radius:10px;
+    padding:16px 20px;display:flex;align-items:center;gap:12px;flex:1;min-width:150px;
+  }
+  .resumo-num{font-size:28px;font-weight:800;}
+  .resumo-label{font-size:12px;color:var(--muted);}
+  .num-amber{color:var(--amber);}
+  .num-blue{color:var(--blue);}
+
+  .btn-refresh{
+    background:none;border:1px solid var(--border);border-radius:7px;color:var(--muted);
+    padding:6px 14px;font-size:12px;cursor:pointer;font-family:'Poppins',sans-serif;transition:.2s;
+  }
+  .btn-refresh:hover{border-color:var(--blue);color:var(--blue);}
+</style>
+</head>
+<body>
+
+<!-- Topbar -->
+<div class="topbar">
+  <div class="topbar-left">
+    <span class="logo">FlowProd</span>
+    <div class="divider-v"></div>
+    <span class="page-title">Painel de Alertas</span>
+  </div>
+  <div class="topbar-right">
+    <a href="/login.html" class="btn-voltar">← Voltar</a>
+    <a href="/admin.html" class="btn-admin">🛠️ Ir ao Admin</a>
+  </div>
+</div>
+
+<!-- Tela de bloqueio (não-admin) -->
+<div id="telaBloqueio">
+  <div class="icone">🔒</div>
+  <h2>Acesso Restrito</h2>
+  <p>Esta página é exclusiva para o administrador do sistema. Faça login como admin para visualizar os alertas.</p>
+  <a href="/login.html" class="btn-admin">Ir para o Login →</a>
+</div>
+
+<!-- Conteúdo dos alertas (só admin) -->
+<div id="telaAlertas">
+
+  <!-- Resumo -->
+  <div class="resumo-bar">
+    <div class="resumo-item">
+      <div>
+        <div class="resumo-num num-amber" id="numClientes">—</div>
+        <div class="resumo-label">Clientes pendentes</div>
+      </div>
+      <span style="font-size:28px;">📋</span>
+    </div>
+    <div class="resumo-item">
+      <div>
+        <div class="resumo-num num-blue" id="numSenhas">—</div>
+        <div class="resumo-label">Senhas pendentes</div>
+      </div>
+      <span style="font-size:28px;">🔑</span>
+    </div>
+    <div style="display:flex;align-items:flex-end;padding-bottom:4px;">
+      <button class="btn-refresh" onclick="carregarAlertas()">🔄 Atualizar</button>
+    </div>
+  </div>
+
+  <!-- Clientes -->
+  <div class="secao">
+    <div class="secao-titulo">📋 Solicitações de Cliente</div>
+    <div id="listaClientes"><div class="vazio">Carregando...</div></div>
+  </div>
+
+  <!-- Senhas -->
+  <div class="secao">
+    <div class="secao-titulo">🔑 Solicitações de Redefinição de Senha</div>
+    <div id="listaSenhas"><div class="vazio">Carregando...</div></div>
+  </div>
+
+</div>
+
+<script>
+  // Verifica autenticação ao carregar
+  (async () => {
+    try {
+      const r = await fetch('/api/me', { credentials: 'include' });
+      if (!r.ok) throw new Error('não autenticado');
+      const { usuario } = await r.json();
+      if (!usuario?.funcoes?.includes('ADMIN')) throw new Error('não é admin');
+
+      // Admin confirmado — mostra o painel
+      document.getElementById('telaBloqueio').style.display = 'none';
+      document.getElementById('telaAlertas').style.display  = 'block';
+      carregarAlertas();
+      setInterval(carregarAlertas, 30000);
+    } catch {
+      // Não admin ou não logado — mantém a tela de bloqueio
+    }
+  })();
+
+  function tempo(iso) {
+    const diff = Date.now() - new Date(iso).getTime();
+    const min  = Math.floor(diff / 60000);
+    const h    = Math.floor(diff / 3600000);
+    const d    = Math.floor(diff / 86400000);
+    if (min < 1)  return 'agora';
+    if (min < 60) return `há ${min} min`;
+    if (h   < 24) return `há ${h}h`;
+    return `há ${d}d — ${new Date(iso).toLocaleDateString('pt-BR')}`;
+  }
+
+  async function carregarAlertas() {
+    try {
+      const r = await fetch('/api/alertas', { credentials: 'include' });
+      const d = await r.json();
+
+      const nCli = d.clientes?.length || 0;
+      const nSen = d.senhas?.length   || 0;
+
+      document.getElementById('numClientes').textContent = nCli;
+      document.getElementById('numSenhas').textContent   = nSen;
+
+      // Clientes
+      const lCli = document.getElementById('listaClientes');
+      if (nCli === 0) {
+        lCli.innerHTML = '<div class="vazio">✅ Nenhuma solicitação de cliente pendente</div>';
+      } else {
+        lCli.innerHTML = d.clientes.map(c => `
+          <div class="card-alerta">
+            <div class="card-alerta-avatar avatar-cliente">${c.nome.charAt(0).toUpperCase()}</div>
+            <div class="card-alerta-info">
+              <div class="card-alerta-nome">${c.nome}</div>
+              <div class="card-alerta-sub">${c.email}${c.empresa ? ' · ' + c.empresa : ''}</div>
+              <div class="card-alerta-tempo">${tempo(c.criado_em)}</div>
+            </div>
+            <span class="badge-pend">Pendente</span>
+          </div>
+        `).join('');
+      }
+
+      // Senhas
+      const lSen = document.getElementById('listaSenhas');
+      if (nSen === 0) {
+        lSen.innerHTML = '<div class="vazio">✅ Nenhuma solicitação de senha pendente</div>';
+      } else {
+        lSen.innerHTML = d.senhas.map(s => `
+          <div class="card-alerta">
+            <div class="card-alerta-avatar avatar-senha">${s.nome.charAt(0).toUpperCase()}</div>
+            <div class="card-alerta-info">
+              <div class="card-alerta-nome">${s.nome}</div>
+              <div class="card-alerta-sub">${s.email}</div>
+              <div class="card-alerta-tempo">${tempo(s.criado_em)}</div>
+            </div>
+            <span class="badge-pend">Pendente</span>
+          </div>
+        `).join('');
+      }
+
+    } catch(e) {
+      console.error('Erro ao carregar alertas:', e);
+    }
+  }
+</script>
+</body>
+</html>

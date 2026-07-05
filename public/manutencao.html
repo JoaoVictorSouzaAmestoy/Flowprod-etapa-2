@@ -1,0 +1,66 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>FlowProd — Manutenção</title>
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/@tabler/icons-webfont@latest/tabler-icons.min.css">
+<style>
+:root {
+  --bg: #070c13; --surface: #0d1520; --border: #1a2840;
+  --blue: #2b7fff; --amber: #f59e0b; --text: #e8edf5; --muted: #6b82a0; --dim: #3a5070;
+}
+*, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+body {
+  background: var(--bg); color: var(--text); font-family: 'Inter', sans-serif;
+  min-height: 100vh; display: flex; align-items: center; justify-content: center;
+  padding: 24px; position: relative; overflow: hidden;
+}
+body::before {
+  content: ''; position: fixed; inset: 0; z-index: 0; pointer-events: none;
+  background-image:
+    linear-gradient(rgba(43,127,255,.025) 1px, transparent 1px),
+    linear-gradient(90deg, rgba(43,127,255,.025) 1px, transparent 1px);
+  background-size: 52px 52px;
+}
+.card {
+  position: relative; z-index: 1; text-align: center;
+  background: var(--surface); border: 1px solid var(--border);
+  border-radius: 24px; padding: 56px 48px; max-width: 480px; width: 100%;
+}
+.icon-wrap {
+  width: 80px; height: 80px; border-radius: 20px; margin: 0 auto 24px;
+  background: rgba(245,158,11,.1); border: 1px solid rgba(245,158,11,.25);
+  display: flex; align-items: center; justify-content: center;
+  font-size: 36px; color: var(--amber);
+  animation: pulse 2.5s ease-in-out infinite;
+}
+@keyframes pulse {
+  0%,100% { box-shadow: 0 0 0 0 rgba(245,158,11,.2); }
+  50%      { box-shadow: 0 0 0 16px rgba(245,158,11,0); }
+}
+.logo { font-size: 14px; font-weight: 700; color: var(--muted); margin-bottom: 20px; }
+.logo span { color: var(--blue); }
+h1 { font-size: 26px; font-weight: 800; letter-spacing: -.5px; margin-bottom: 12px; }
+p { color: var(--muted); font-size: 14px; line-height: 1.8; }
+.badge {
+  display: inline-flex; align-items: center; gap: 8px;
+  margin-top: 28px; padding: 8px 20px; border-radius: 20px;
+  background: rgba(245,158,11,.08); border: 1px solid rgba(245,158,11,.2);
+  color: var(--amber); font-size: 12px; font-weight: 600;
+}
+.dot { width: 7px; height: 7px; border-radius: 50%; background: var(--amber); animation: blink 1.2s ease-in-out infinite; }
+@keyframes blink { 0%,100%{opacity:1} 50%{opacity:.2} }
+</style>
+</head>
+<body>
+<div class="card">
+  <div class="logo">Flow<span>Prod</span></div>
+  <div class="icon-wrap"><i class="ti ti-tools"></i></div>
+  <h1>Sistema em manutenção</h1>
+  <p>Estamos realizando melhorias para oferecer uma experiência ainda melhor.<br>O sistema estará disponível novamente em breve.</p>
+  <div class="badge"><span class="dot"></span> Manutenção em andamento</div>
+</div>
+</body>
+</html>

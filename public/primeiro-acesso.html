@@ -1,0 +1,447 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>FlowProd — Primeiro Acesso</title>
+<link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+<style>
+  :root{
+    --bg:#080d14; --surface:#0d1520; --border:#1a2740;
+    --text:#e8edf5; --muted:#6b82a0; --dim:#3a5070;
+    --blue:#2b7fff; --blue-dk:#1a5ccc;
+    --green:#22c55e; --error:#f43f5e; --amber:#f59e0b;
+  }
+  *{box-sizing:border-box;margin:0;padding:0;}
+  body{background:var(--bg);color:var(--text);font-family:'Poppins',sans-serif;
+    min-height:100vh;display:flex;flex-direction:column;align-items:center;
+    justify-content:center;padding:24px;}
+  .back{position:fixed;top:18px;left:22px;color:var(--muted);font-size:13px;
+    text-decoration:none;display:flex;align-items:center;gap:5px;transition:.2s;}
+  .back:hover{color:var(--blue);}
+
+  .card{background:var(--surface);border:1px solid var(--border);border-radius:16px;
+    padding:44px 36px;width:100%;max-width:420px;display:flex;flex-direction:column;gap:20px;}
+  .card-top{text-align:center;display:flex;flex-direction:column;gap:10px;align-items:center;}
+  .logo{font-size:19px;font-weight:700;color:var(--blue);letter-spacing:1px;}
+  .card-icon{font-size:52px;}
+  h2{font-size:21px;font-weight:700;}
+  .sub{color:var(--muted);font-size:13px;line-height:1.7;}
+
+  .form-group{display:flex;flex-direction:column;gap:6px;}
+  label{font-size:11px;font-weight:600;color:var(--muted);text-transform:uppercase;letter-spacing:.7px;}
+  input{background:var(--bg);border:1px solid var(--border);border-radius:8px;
+    color:var(--text);font-family:'Poppins',sans-serif;font-size:14px;
+    padding:11px 14px;transition:.2s;outline:none;width:100%;}
+  input:focus{border-color:var(--blue);}
+
+  .btn{border:none;border-radius:8px;color:#fff;cursor:pointer;
+    font-family:'Poppins',sans-serif;font-size:14px;font-weight:600;
+    padding:13px;width:100%;transition:.2s;display:flex;align-items:center;
+    justify-content:center;gap:8px;}
+  .btn-blue {background:linear-gradient(135deg,var(--blue-dk),var(--blue));}
+  .btn-green{background:linear-gradient(135deg,#15803d,var(--green));}
+  .btn-ghost{background:none;border:1px solid var(--border);color:var(--muted);}
+  .btn-ghost:hover{border-color:var(--blue);color:var(--blue);}
+  .btn:hover{opacity:.9;}
+  .btn:disabled{opacity:.5;cursor:not-allowed;}
+  .spinner{width:14px;height:14px;border:2px solid rgba(255,255,255,.3);
+    border-top-color:#fff;border-radius:50%;animation:spin .7s linear infinite;display:none;}
+  @keyframes spin{to{transform:rotate(360deg);}}
+
+  .msg{border-radius:8px;font-size:13px;padding:10px 14px;text-align:center;display:none;}
+  .msg.err {background:rgba(244,63,94,.1);border:1px solid rgba(244,63,94,.25);color:var(--error);}
+  .msg.warn{background:rgba(245,158,11,.1);border:1px solid rgba(245,158,11,.25);color:var(--amber);}
+  .info-box{background:var(--bg);border:1px solid var(--border);border-radius:8px;
+    padding:11px 14px;font-size:12px;color:var(--dim);line-height:1.7;}
+
+  /* Tela de credenciais */
+  #telaCred{display:none;width:100%;max-width:440px;}
+  .cred-card{background:var(--surface);border:1px solid rgba(34,197,94,.2);border-radius:16px;
+    padding:44px 32px;display:flex;flex-direction:column;gap:18px;align-items:center;text-align:center;}
+  .cred-ring{width:88px;height:88px;border-radius:50%;
+    background:rgba(34,197,94,.08);border:2px solid rgba(34,197,94,.3);
+    display:flex;align-items:center;justify-content:center;font-size:44px;
+    animation:glow 2.5s ease-in-out infinite;}
+  @keyframes glow{
+    0%,100%{box-shadow:0 0 0 0 rgba(34,197,94,.25)}
+    50%{box-shadow:0 0 0 14px rgba(34,197,94,0)}
+  }
+  .cred-nome{font-size:20px;font-weight:700;}
+  .cred-sub{font-size:13px;color:var(--muted);line-height:1.7;max-width:320px;}
+
+  .cred-box{background:var(--bg);border:1px solid rgba(34,197,94,.2);border-radius:12px;
+    padding:20px;width:100%;display:flex;flex-direction:column;gap:14px;text-align:left;}
+  .cred-titulo{font-size:11px;font-weight:700;color:var(--green);text-transform:uppercase;letter-spacing:.8px;}
+  .cred-row{display:flex;align-items:center;justify-content:space-between;gap:8px;flex-wrap:wrap;}
+  .cred-label{font-size:12px;color:var(--muted);flex-shrink:0;}
+  .cred-val{font-family:'Consolas',monospace;font-size:14px;font-weight:600;
+    background:#0d1520;padding:5px 12px;border-radius:6px;border:1px solid #1a2740;
+    color:var(--text);word-break:break-all;}
+  .btn-copiar{background:none;border:1px solid #1a2740;color:var(--muted);
+    padding:4px 10px;border-radius:5px;cursor:pointer;font-size:11px;
+    font-family:'Poppins',sans-serif;transition:.2s;flex-shrink:0;}
+  .btn-copiar:hover{border-color:var(--blue);color:var(--blue);}
+  .funcoes-wrap{display:flex;flex-wrap:wrap;gap:6px;margin-top:2px;}
+  .funcao-tag{padding:3px 10px;border-radius:5px;font-size:11px;font-weight:700;
+    background:rgba(43,127,255,.12);color:var(--blue);border:1px solid rgba(43,127,255,.2);}
+
+  .aviso-box{background:rgba(245,158,11,.06);border:1px solid rgba(245,158,11,.2);
+    border-radius:8px;padding:12px 16px;font-size:12px;color:var(--amber);line-height:1.7;
+    text-align:left;width:100%;}
+
+  .card{position:relative;overflow:hidden;box-shadow:0 24px 70px rgba(0,0,0,.28);} 
+
+  /* Tela senha alterada */
+  #telaSenhaAlterada{display:none;width:100%;max-width:420px;}
+  .senha-card{background:var(--surface);border:1px solid rgba(43,127,255,.2);border-radius:16px;
+    padding:44px 32px;display:flex;flex-direction:column;gap:18px;align-items:center;text-align:center;}
+  .senha-ring{width:80px;height:80px;border-radius:50%;
+    background:rgba(43,127,255,.08);border:2px solid rgba(43,127,255,.3);
+    display:flex;align-items:center;justify-content:center;font-size:38px;}
+  .alerta-box{background:rgba(244,63,94,.06);border:1px solid rgba(244,63,94,.2);
+    border-radius:8px;padding:12px 16px;font-size:12px;color:var(--error);
+    line-height:1.7;text-align:left;width:100%;}
+</style>
+</head>
+<body>
+<a href="/login.html" class="back">← Login</a>
+
+<!-- TELA 1: Verificar por nome -->
+<div id="telaEntrada">
+  <div class="card">
+    <div class="card-top">
+      <span class="logo">FlowProd</span>
+      <div class="card-icon">🔐</div>
+      <h2>Primeiro Acesso</h2>
+      <p class="sub">
+        ✅ O administrador criou uma conta para você.<br>
+        📝 Digite seu <strong>nome completo</strong> para recuperar suas credenciais (e-mail e senha).<br>
+        🔑 Faça login e receba <strong>notificação de boas-vindas</strong> em tempo real!
+      </p>
+    </div>
+
+    <div class="form-group">
+      <label>Seu nome completo</label>
+      <input type="text" id="inputNome" placeholder="Ex: João Silva" autocomplete="off" spellcheck="false">
+    </div>
+
+    <div class="msg" id="msgEntrada"></div>
+
+    <button class="btn btn-blue" id="btnVerificar" onclick="verificar()">
+      <span id="btnTxt">Ver minhas credenciais</span>
+      <div class="spinner" id="btnSp"></div>
+    </button>
+
+    <div class="info-box">
+      <strong>💡 Como funciona:</strong><br>
+      1️⃣ O admin criou sua conta no sistema<br>
+      2️⃣ Digite seu nome para encontrar suas credenciais<br>
+      3️⃣ Use e-mail + senha para fazer login<br>
+      4️⃣ Você receberá notificação de boas-vindas em tempo real ✨
+    </div>
+
+    <div style="display:flex;flex-direction:column;gap:8px;">
+      <a href="/login.html" style="text-align:center;font-size:13px;color:var(--dim);text-decoration:none;">
+        Já conheço meu e-mail e senha → <span style="color:var(--blue)">Fazer login</span>
+      </a>
+      <button onclick="mostrarTelaAlterada()" style="background:none;border:none;cursor:pointer;font-size:12px;color:var(--dim);font-family:'Poppins',sans-serif;transition:.2s;"
+        onmouseover="this.style.color='var(--amber)'" onmouseout="this.style.color='var(--dim)'">
+        🔑 Fui notificado de troca de senha
+      </button>
+    </div>
+  </div>
+</div>
+
+<!-- TELA 2: Credenciais -->
+<div id="telaCred">
+  <div class="cred-card">
+    <div class="cred-ring">🎉</div>
+    <div class="cred-nome" id="credNome">Olá!</div>
+    <p class="cred-sub">Sua conta está pronta! Copie suas credenciais abaixo, faça login e você receberá uma <strong>notificação de boas-vindas</strong> em tempo real. 🔔</p>
+
+    <div class="cred-box">
+      <div class="cred-titulo">🔑 Suas credenciais de acesso</div>
+      <div class="cred-row">
+        <span class="cred-label">E-mail:</span>
+        <span class="cred-val" id="credEmail">—</span>
+        <button class="btn-copiar" onclick="copiar('credEmail',this)">Copiar</button>
+      </div>
+      <div class="cred-row">
+        <span class="cred-label">Senha:</span>
+        <span class="cred-val" id="credSenha">—</span>
+        <button class="btn-copiar" onclick="copiar('credSenha',this)">Copiar</button>
+      </div>
+      <div>
+        <div style="font-size:12px;color:var(--muted);margin-bottom:6px;">Seus módulos:</div>
+        <div class="funcoes-wrap" id="credFuncoes"></div>
+      </div>
+    </div>
+
+    <div class="aviso-box">
+      ✏️ Copie suas credenciais agora. Por segurança, esta página não salva os dados. Após fazer login, você receberá uma notificação de confirmação. 🔔
+    </div>
+
+    <button class="btn btn-green" id="btnIrLogin" onclick="irParaLogin()">
+      Entrar no sistema agora →
+    </button>
+    <button class="btn btn-ghost" onclick="voltarEntrada()">← Voltar</button>
+  </div>
+</div>
+
+<!-- TELA 3: Senha foi alterada -->
+<div id="telaSenhaAlterada">
+  <div class="senha-card">
+    <div class="senha-ring">🔑</div>
+    <div style="font-size:20px;font-weight:700;">Sua Senha Foi Alterada</div>
+    <p style="font-size:13px;color:var(--muted);line-height:1.7;max-width:320px;">
+      Você solicitou a alteração de sua senha de acesso ao FlowProd.<br><br>
+      <strong>Digite seu nome abaixo</strong> para verificar o status da sua solicitação.
+    </p>
+    
+    <div class="form-group" style="margin-top:16px;">
+      <label>Seu nome completo</label>
+      <input type="text" id="inputNomeSenha" placeholder="Ex: João Silva" autocomplete="off" spellcheck="false">
+    </div>
+    
+    <div class="msg" id="msgSenha"></div>
+    
+    <button class="btn btn-blue" id="btnVerificarSenha" onclick="verificarStatusSenha()" style="margin-bottom:12px;">
+      <span id="btnTxtSenha">Verificar status</span>
+      <div class="spinner" id="btnSpSenha"></div>
+    </button>
+    
+    <button class="btn btn-ghost" onclick="voltarEntrada()">
+      ← Voltar
+    </button>
+  </div>
+  
+  <!-- Resultado da verificação -->
+  <div id="telaStatusSenha" style="display:none;">
+    <div class="senha-card">
+      <div id="statusIcon" style="font-size:44px;margin-bottom:12px;"></div>
+      <div style="font-size:18px;font-weight:700;margin-bottom:8px;" id="statusTitulo"></div>
+      <p id="statusTexto" style="font-size:13px;color:var(--muted);line-height:1.7;margin-bottom:16px;"></p>
+      
+      <div id="statusCredenciais" style="display:none;">
+        <div class="cred-box">
+          <div class="cred-titulo">🔑 Suas novas credenciais</div>
+          <div class="cred-row">
+            <span class="cred-label">E-mail:</span>
+            <span class="cred-val" id="statusEmail">—</span>
+            <button class="btn-copiar" onclick="copiarStatus('statusEmail',this)">Copiar</button>
+          </div>
+          <div class="cred-row">
+            <span class="cred-label">Senha:</span>
+            <span class="cred-val" id="statusSenha">—</span>
+            <button class="btn-copiar" onclick="copiarStatus('statusSenha',this)">Copiar</button>
+          </div>
+        </div>
+      </div>
+      
+      <button class="btn btn-blue" onclick="irParaLoginDeSenha()" id="btnIrLoginSenha" style="display:none;">
+        Entrar no sistema agora →
+      </button>
+      <button class="btn btn-ghost" onclick="voltarParaSenha()">
+        ← Voltar
+      </button>
+    </div>
+  </div>
+</div>
+
+<script>
+  let _emailCred = '';
+
+  document.getElementById('inputNome').addEventListener('keydown', e => {
+    if (e.key === 'Enter') verificar();
+  });
+
+  document.getElementById('inputNomeSenha').addEventListener('keydown', e => {
+    if (e.key === 'Enter') verificarStatusSenha();
+  });
+
+  async function verificar() {
+    const nome = document.getElementById('inputNome').value.trim();
+    const msg  = document.getElementById('msgEntrada');
+    msg.style.display = 'none';
+
+    if (nome.length < 2) {
+      msg.textContent = 'Digite seu nome completo.';
+      msg.className = 'msg err'; msg.style.display = 'block'; return;
+    }
+
+    const btn = document.getElementById('btnVerificar');
+    const txt = document.getElementById('btnTxt');
+    const sp  = document.getElementById('btnSp');
+    btn.disabled = true; txt.style.display = 'none'; sp.style.display = 'block';
+
+    try {
+      const r = await fetch(`/api/convites/por-nome?nome=${encodeURIComponent(nome)}`);
+      const d = await r.json();
+
+      if (!r.ok) {
+        msg.textContent = d.erro || 'Nenhuma conta encontrada com este nome.';
+        msg.className = 'msg err'; msg.style.display = 'block';
+        btn.disabled = false; txt.style.display = 'block'; sp.style.display = 'none';
+        return;
+      }
+
+      // Múltiplos resultados — pede e-mail
+      if (d.multiplos) {
+        msg.textContent = 'Existe mais de uma conta com este nome. Consulte o administrador para obter seu e-mail.';
+        msg.className = 'msg warn'; msg.style.display = 'block';
+        btn.disabled = false; txt.style.display = 'block'; sp.style.display = 'none';
+        return;
+      }
+
+      mostrarCredenciais(d);
+    } catch(e) {
+      msg.textContent = 'Erro de conexão. Tente novamente.';
+      msg.className = 'msg err'; msg.style.display = 'block';
+      btn.disabled = false; txt.style.display = 'block'; sp.style.display = 'none';
+    }
+  }
+
+  function mostrarCredenciais(d) {
+    _emailCred = d.email;
+    document.getElementById('telaEntrada').style.display = 'none';
+    document.getElementById('telaCred').style.display    = 'block';
+    document.getElementById('credNome').textContent      = `Olá, ${d.nome}! 👋`;
+    document.getElementById('credEmail').textContent     = d.email;
+    document.getElementById('credSenha').textContent     = d.senha;
+    document.getElementById('credFuncoes').innerHTML = (d.funcoes || [])
+      .map(f => `<span class="funcao-tag">${f}</span>`).join('');
+  }
+
+  function mostrarTelaAlterada() {
+    document.getElementById('telaEntrada').style.display       = 'none';
+    document.getElementById('telaCred').style.display          = 'none';
+    document.getElementById('telaSenhaAlterada').style.display = 'block';
+    document.getElementById('inputNomeSenha').value = '';
+    document.getElementById('msgSenha').style.display = 'none';
+    document.getElementById('telaStatusSenha').style.display = 'none';
+  }
+
+  async function verificarStatusSenha() {
+    const nome = document.getElementById('inputNomeSenha').value.trim();
+    const msg  = document.getElementById('msgSenha');
+    msg.style.display = 'none';
+
+    if (nome.length < 2) {
+      msg.textContent = 'Digite seu nome completo.';
+      msg.className = 'msg err'; msg.style.display = 'block'; return;
+    }
+
+    const btn = document.getElementById('btnVerificarSenha');
+    const txt = document.getElementById('btnTxtSenha');
+    const sp  = document.getElementById('btnSpSenha');
+    btn.disabled = true; txt.style.display = 'none'; sp.style.display = 'block';
+
+    try {
+      const r = await fetch(`/api/senha/status-por-nome?nome=${encodeURIComponent(nome)}`);
+      const d = await r.json();
+
+      if (!r.ok) {
+        msg.textContent = d.erro || 'Nenhuma solicitação encontrada.';
+        msg.className = 'msg err'; msg.style.display = 'block';
+        btn.disabled = false; txt.style.display = 'block'; sp.style.display = 'none';
+        return;
+      }
+
+      mostrarStatusSenha(d);
+    } catch(e) {
+      msg.textContent = 'Erro de conexão. Tente novamente.';
+      msg.className = 'msg err'; msg.style.display = 'block';
+      btn.disabled = false; txt.style.display = 'block'; sp.style.display = 'none';
+    }
+  }
+
+  function mostrarStatusSenha(d) {
+    const btn = document.getElementById('btnVerificarSenha');
+    btn.disabled = false;
+    document.getElementById('btnTxtSenha').style.display = 'block';
+    document.getElementById('btnSpSenha').style.display = 'none';
+
+    // Esconde o form e mostra resultado
+    document.querySelector('#telaSenhaAlterada > .senha-card').style.display = 'none';
+    document.getElementById('telaStatusSenha').style.display = 'block';
+
+    const statusIcon = document.getElementById('statusIcon');
+    const statusTitulo = document.getElementById('statusTitulo');
+    const statusTexto = document.getElementById('statusTexto');
+    const statusCredenciais = document.getElementById('statusCredenciais');
+    const btnIrLogin = document.getElementById('btnIrLoginSenha');
+
+    if (d.status === 'PENDENTE') {
+      statusIcon.textContent = '⏳';
+      statusTitulo.textContent = 'Aguardando aprovação';
+      statusTexto.textContent = d.mensagem;
+      statusCredenciais.style.display = 'none';
+      btnIrLogin.style.display = 'none';
+    } else if (d.status === 'APROVADA') {
+      statusIcon.textContent = '✅';
+      statusTitulo.textContent = 'Sua nova senha está pronta!';
+      statusTexto.textContent = d.mensagem;
+      
+      document.getElementById('statusEmail').textContent = d.email;
+      document.getElementById('statusSenha').textContent = d.senha;
+      statusCredenciais.style.display = 'block';
+      btnIrLogin.style.display = 'block';
+    } else {
+      statusIcon.textContent = '❌';
+      statusTitulo.textContent = 'Solicitação recusada';
+      statusTexto.textContent = d.mensagem;
+      statusCredenciais.style.display = 'none';
+      btnIrLogin.style.display = 'none';
+    }
+  }
+
+  function voltarParaSenha() {
+    document.querySelector('#telaSenhaAlterada > .senha-card').style.display = 'block';
+    document.getElementById('telaStatusSenha').style.display = 'none';
+  }
+
+  function copiarStatus(id, btn) {
+    navigator.clipboard.writeText(document.getElementById(id).textContent).then(() => {
+      const orig = btn.textContent;
+      btn.textContent = '✔ Copiado!';
+      btn.style.color = '#22c55e';
+      setTimeout(() => { btn.textContent = orig; btn.style.color = ''; }, 1500);
+    });
+  }
+
+  function irParaLoginDeSenha() {
+    const email = document.getElementById('statusEmail').textContent;
+    window.location.href = email && email !== '—'
+      ? `/login.html?email=${encodeURIComponent(email)}`
+      : '/login.html';
+  }
+
+  function voltarEntrada() {
+    document.getElementById('telaEntrada').style.display       = 'block';
+    document.getElementById('telaCred').style.display          = 'none';
+    document.getElementById('telaSenhaAlterada').style.display = 'none';
+    document.getElementById('btnVerificar').disabled  = false;
+    document.getElementById('btnTxt').style.display   = 'block';
+    document.getElementById('btnSp').style.display    = 'none';
+    document.querySelector('#telaSenhaAlterada > .senha-card').style.display = 'block';
+    document.getElementById('telaStatusSenha').style.display = 'none';
+  }
+
+  function copiar(id, btn) {
+    navigator.clipboard.writeText(document.getElementById(id).textContent).then(() => {
+      const orig = btn.textContent;
+      btn.textContent = '✔ Copiado!';
+      btn.style.color = '#22c55e';
+      setTimeout(() => { btn.textContent = orig; btn.style.color = ''; }, 1500);
+    });
+  }
+
+  function irParaLogin() {
+    window.location.href = _emailCred
+      ? `/login.html?email=${encodeURIComponent(_emailCred)}`
+      : '/login.html';
+  }
+</script>
+</body>
+</html>
