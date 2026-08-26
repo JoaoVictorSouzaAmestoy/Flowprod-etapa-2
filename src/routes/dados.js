@@ -7,49 +7,143 @@ const { autenticar } = require('../middlewares/auth');
 router.use(autenticar);
 
 // ── PEDIDOS ───────────────────────────────────────────────
-router.get('/pedidos', async (req,res) => {
-  try {
-    const r = await db.query('SELECT * FROM pedidos_cliente ORDER BY criado_em DESC');
-    res.json({ pedidos: r.rows });
-  } catch(e) { res.status(500).json({ erro: 'Erro ao buscar pedidos.' }); }
-});
-
-router.post('/pedidos', async (req,res) => {
-  const { cliente_nome, produto, quantidade, prazo, observacoes } = req.body;
-  if (!cliente_nome||!produto||!quantidade||!prazo) return res.status(400).json({ erro: 'Campos obrigatórios faltando.' });
-  try {
-    const r = await db.query(
-      `INSERT INTO pedidos_cliente (cliente_nome,produto,quantidade,prazo,observacoes)
-       VALUES ($1,$2,$3,$4,$5) RETURNING *`,
-      [cliente_nome, produto, quantidade, prazo, observacoes||null]
-    );
-    res.status(201).json({ mensagem: 'Pedido criado!', pedido: r.rows[0] });
-  } catch(e) { res.status(500).json({ erro: 'Erro ao criar pedido.' }); }
-});
+// (As rotas de pedidos vivem em src/routes/pedidos.js, montadas em /api/pedidos.
+//  Removidas daqui as rotas antigas que gravavam em "pedidos_cliente" —
+//  essa tabela não existe mais no schema atual.)
 
 // ── FORECAST ──────────────────────────────────────────────
-router.get('/forecast', async (req,res) => {
+
+// GET /api/forecast/pendentes — itens de pedidos do Comercial que AINDA
+// não têm forecast criado. É essa lista que alimenta a tela de Forecast.
+router.get('/forecast/pendentes', async (req, res) => {
   try {
-    const r = await db.query('SELECT * FROM forecast ORDER BY criado_em DESC');
-    res.json({ forecast: r.rows });
-  } catch(e) { res.status(500).json({ erro: 'Erro ao buscar forecast.' }); }
+    const r = await db.query(`
+      SELECT pi.id            AS pedido_item_id,
+             pi.produto,
+             pi.quantidade,
+             pi.unidade,
+             p.id             AS pedido_id,
+             p.numero          AS pedido_numero,
+             p.data_desejada,
+             p.observacoes    AS pedido_observacoes,
+             p.status         AS pedido_status,
+             c.nome           AS cliente_nome,
+             c.empresa        AS cliente_empresa
+      FROM pedido_itens pi
+      JOIN pedidos  p ON p.id = pi.pedido_id
+      JOIN clientes c ON c.id = p.cliente_id
+      WHERE NOT EXISTS (
+        SELECT 1 FROM forecast f WHERE f.pedido_item_id = pi.id
+      )
+      AND p.status NOT IN ('CANCELADO')
+      ORDER BY p.criado_em ASC
+    `);
+    res.json({ itens: r.rows });
+  } catch (e) {
+    console.error('Erro ao buscar itens pendentes de forecast:', e.message);
+    res.status(500).json({ erro: 'Erro ao buscar itens pendentes de forecast.' });
+  }
 });
 
-router.post('/forecast', async (req,res) => {
-  const { pedido_id, demanda_prevista, data_inicio, prazo_limite, observacoes } = req.body;
-  if (!demanda_prevista||!data_inicio||!prazo_limite) return res.status(400).json({ erro: 'Campos obrigatórios faltando.' });
+// GET /api/forecast — lista os forecasts já criados, com dados do item/pedido/cliente
+router.get('/forecast', async (req, res) => {
+  try {
+    const r = await db.query(`
+      SELECT f.id, f.pedido_item_id, f.produto, f.demanda_prevista,
+             f.data_inicio, f.prazo_limite, f.observacoes, f.status,
+             f.criado_por, f.criado_em,
+             p.id     AS pedido_id,
+             p.numero AS pedido_numero,
+             c.nome   AS cliente_nome
+      FROM forecast f
+      LEFT JOIN pedido_itens pi ON pi.id = f.pedido_item_id
+      LEFT JOIN pedidos      p  ON p.id  = pi.pedido_id
+      LEFT JOIN clientes     c  ON c.id  = p.cliente_id
+      ORDER BY f.criado_em DESC
+    `);
+    res.json({ forecast: r.rows });
+  } catch (e) {
+    console.error('Erro ao buscar forecast:', e.message);
+    res.status(500).json({ erro: 'Erro ao buscar forecast.' });
+  }
+});
+
+// POST /api/forecast — cria uma previsão de demanda a partir de um item de pedido
+router.post('/forecast', async (req, res) => {
+  const { pedido_item_id, demanda_prevista, data_inicio, prazo_limite, observacoes } = req.body;
+
+  if (!pedido_item_id || !demanda_prevista || !data_inicio || !prazo_limite) {
+    return res.status(400).json({ erro: 'Informe pedido_item_id, demanda_prevista, data_inicio e prazo_limite.' });
+  }
+
+  const client = await db.connect();
+  try {
+    await client.query('BEGIN');
+
+    // Busca o item + produto + pedido dono (também valida que o item existe)
+    const itemRes = await client.query(
+      `SELECT pi.id, pi.produto, pi.pedido_id
+       FROM pedido_itens pi WHERE pi.id = $1`,
+      [pedido_item_id]
+    );
+    if (!itemRes.rows.length) {
+      await client.query('ROLLBACK');
+      return res.status(404).json({ erro: 'Item de pedido não encontrado.' });
+    }
+    const item = itemRes.rows[0];
+
+    // Bloqueia forecast duplicado para o mesmo item
+    const existente = await client.query(
+      `SELECT id FROM forecast WHERE pedido_item_id = $1`,
+      [pedido_item_id]
+    );
+    if (existente.rows.length) {
+      await client.query('ROLLBACK');
+      return res.status(409).json({ erro: 'Este item já possui um forecast registrado.' });
+    }
+
+    const r = await client.query(
+      `INSERT INTO forecast (pedido_item_id, produto, demanda_prevista, data_inicio, prazo_limite, observacoes, criado_por)
+       VALUES ($1, $2, $3, $4, $5, $6, $7) RETURNING *`,
+      [pedido_item_id, item.produto, demanda_prevista, data_inicio, prazo_limite, observacoes || null, req.usuario.id]
+    );
+
+    // Se o pedido ainda está como SOLICITADO, avança para EM_ANALISE
+    await client.query(
+      `UPDATE pedidos SET status = 'EM_ANALISE', atualizado_em = NOW()
+       WHERE id = $1 AND status = 'SOLICITADO'`,
+      [item.pedido_id]
+    );
+
+    await client.query('COMMIT');
+    res.status(201).json({ mensagem: 'Forecast registrado!', forecast: r.rows[0] });
+  } catch (e) {
+    await client.query('ROLLBACK');
+    console.error('Erro ao registrar forecast:', e.message);
+    res.status(500).json({ erro: 'Erro ao registrar forecast.' });
+  } finally {
+    client.release();
+  }
+});
+
+// PATCH /api/forecast/:id/status — aprova ou marca para revisão
+router.patch('/forecast/:id/status', async (req, res) => {
+  const { status } = req.body;
+  const validos = ['PENDENTE', 'APROVADO', 'REVISAO'];
+  if (!validos.includes(status)) {
+    return res.status(400).json({ erro: 'Status inválido.' });
+  }
   try {
     const r = await db.query(
-      `INSERT INTO forecast (pedido_id,demanda_prevista,data_inicio,prazo_limite,observacoes,criado_por)
-       VALUES ($1,$2,$3,$4,$5,$6) RETURNING *`,
-      [pedido_id||null, demanda_prevista, data_inicio, prazo_limite, observacoes||null, req.usuario.id]
+      `UPDATE forecast SET status = $1 WHERE id = $2 RETURNING *`,
+      [status, req.params.id]
     );
-    // Atualiza status do pedido para EM_ANALISE
-    if (pedido_id) {
-      await db.query(`UPDATE pedidos_cliente SET status='EM_ANALISE' WHERE id=$1`, [pedido_id]);
-    }
-    res.status(201).json({ mensagem: 'Forecast registrado!', forecast: r.rows[0] });
-  } catch(e) { res.status(500).json({ erro: 'Erro ao registrar forecast.' }); }
+    if (!r.rows.length) return res.status(404).json({ erro: 'Forecast não encontrado.' });
+    res.json({ mensagem: 'Status atualizado!', forecast: r.rows[0] });
+  } catch (e) {
+    console.error('Erro ao atualizar status do forecast:', e.message);
+    res.status(500).json({ erro: 'Erro ao atualizar status do forecast.' });
+  }
 });
 
 // ── PLANO MESTRE ──────────────────────────────────────────
