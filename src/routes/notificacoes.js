@@ -150,7 +150,8 @@ router.post('/enviar-nova-funcao', autenticar, async (req, res) => {
       MRP: '🔩 Planejamento de Recursos',
       ESTOQUE: '📦 Gestão de Estoque',
       CRP: '🏭 Planejamento de Capacidade',
-      DASHBOARD: '📈 Visão Geral'
+      DASHBOARD: '📈 Visão Geral',
+      COMERCIAL: '🤝 Comercial'
     };
     
     const nomeFuncao = FUNCOES[funcao] || funcao;
