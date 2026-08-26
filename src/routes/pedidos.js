@@ -81,8 +81,9 @@ router.get('/meus', autenticarCliente, async (req, res) => {
     const ids = pedidos.rows.map(p => p.id);
     let itensPorPedido = {};
     if (ids.length) {
+      // NOTE: agora inclui "id" — necessário para o Forecast referenciar pedido_item_id
       const itens = await db.query(
-        `SELECT pedido_id, produto, quantidade, unidade
+        `SELECT id, pedido_id, produto, quantidade, unidade
          FROM pedido_itens WHERE pedido_id = ANY($1::int[]) ORDER BY id`,
         [ids]
       );
@@ -116,8 +117,9 @@ router.get('/', autenticar, autorizarFuncao('FORECAST', 'COMERCIAL', 'ADMIN'), a
     const ids = pedidos.rows.map(p => p.id);
     let itensPorPedido = {};
     if (ids.length) {
+      // NOTE: agora inclui "id" — necessário para o Forecast referenciar pedido_item_id
       const itens = await db.query(
-        `SELECT pedido_id, produto, quantidade, unidade
+        `SELECT id, pedido_id, produto, quantidade, unidade
          FROM pedido_itens WHERE pedido_id = ANY($1::int[]) ORDER BY id`,
         [ids]
       );
