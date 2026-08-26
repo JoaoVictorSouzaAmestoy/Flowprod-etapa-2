@@ -63,6 +63,7 @@ async function login(req, res) {
       ESTOQUE:   '/tela5.html',
       CRP:       '/tela6.html',
       DASHBOARD: '/dashboard.html',
+      COMERCIAL: '/comercial.html',
     };
 
     // Monta lista de telas que o usuário pode acessar
