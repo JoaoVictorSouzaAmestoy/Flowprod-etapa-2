@@ -133,21 +133,22 @@ async function evClienteAprovado(clienteId, clienteNome, clienteEmail) {
 }
 
 // Pedido criado pelo cliente → notifica responsáveis de Forecast
-async function evPedidoCriado(clienteNome, produto, quantidade) {
+// resumoItens: string tipo "3x Produto A, 10x Produto B"
+async function evPedidoCriado(clienteNome, numeroPedido, resumoItens) {
   try {
     const r = await db.query(
       `SELECT id FROM usuarios WHERE 'FORECAST'=ANY(funcoes) AND ativo=TRUE`
     );
     for (const u of r.rows) {
       await notificar(u.id, 'pedido_novo',
-        `📋 Novo pedido recebido`,
-        `${clienteNome} enviou um pedido: ${quantidade}x ${produto}.`
+        `📋 Novo pedido recebido — ${numeroPedido}`,
+        `${clienteNome} enviou o pedido ${numeroPedido}: ${resumoItens}.`
       );
     }
     // Admin também recebe
     await notificarAdmins('pedido_novo',
-      `📋 Novo pedido: ${produto}`,
-      `${clienteNome} enviou um pedido de ${quantidade}x ${produto}.`
+      `📋 Novo pedido: ${numeroPedido}`,
+      `${clienteNome} enviou o pedido ${numeroPedido}: ${resumoItens}.`
     );
   } catch(e) { console.error('[evPedidoCriado]', e.message); }
 }
