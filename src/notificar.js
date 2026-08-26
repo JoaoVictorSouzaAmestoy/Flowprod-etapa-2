@@ -137,7 +137,7 @@ async function evClienteAprovado(clienteId, clienteNome, clienteEmail) {
 async function evPedidoCriado(clienteNome, numeroPedido, resumoItens) {
   try {
     const r = await db.query(
-      `SELECT id FROM usuarios WHERE 'FORECAST'=ANY(funcoes) AND ativo=TRUE`
+      `SELECT id FROM usuarios WHERE ('FORECAST'=ANY(funcoes) OR 'COMERCIAL'=ANY(funcoes)) AND ativo=TRUE`
     );
     for (const u of r.rows) {
       await notificar(u.id, 'pedido_novo',
