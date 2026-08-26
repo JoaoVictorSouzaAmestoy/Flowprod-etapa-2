@@ -16,8 +16,11 @@ DROP TABLE IF EXISTS mrp                     CASCADE;
 DROP TABLE IF EXISTS estoque                 CASCADE;
 DROP TABLE IF EXISTS plano_mestre            CASCADE;
 DROP TABLE IF EXISTS forecast                CASCADE;
+DROP TABLE IF EXISTS pedido_itens            CASCADE;
 DROP TABLE IF EXISTS pedidos_cliente         CASCADE;
+DROP TABLE IF EXISTS pedidos                 CASCADE;
 DROP TABLE IF EXISTS clientes                CASCADE;
+DROP FUNCTION IF EXISTS gerar_numero_pedido  CASCADE;
 DROP TABLE IF EXISTS usuarios                CASCADE;
 
 -- ── 2. RECRIA TABELAS ────────────────────────────────────────
@@ -61,24 +64,45 @@ CREATE TABLE solicitacoes_executor (
   resolvido_em TIMESTAMP
 );
 
--- Pedidos dos clientes
-CREATE TABLE pedidos_cliente (
-  id          SERIAL PRIMARY KEY,
-  cliente_id  INTEGER REFERENCES clientes(id) ON DELETE SET NULL,
-  produto     VARCHAR(200) NOT NULL,
-  quantidade  INTEGER      NOT NULL CHECK (quantidade > 0),
-  unidade     VARCHAR(50),
-  prazo       DATE,
-  observacoes TEXT,
-  status      VARCHAR(20)  DEFAULT 'NOVO'
-              CHECK (status IN ('NOVO','EM_ANALISE','CONCLUIDO','CANCELADO')),
-  criado_em   TIMESTAMP    DEFAULT NOW()
+-- Pedidos dos clientes (cabeçalho — um pedido pode ter vários produtos)
+CREATE TABLE pedidos (
+  id            SERIAL PRIMARY KEY,
+  numero        VARCHAR(20)  UNIQUE,   -- preenchido pela trigger abaixo (ex: PED-000123)
+  cliente_id    INTEGER      NOT NULL REFERENCES clientes(id) ON DELETE CASCADE,
+  data_desejada DATE,
+  observacoes   TEXT,
+  status        VARCHAR(20)  DEFAULT 'SOLICITADO'
+                CHECK (status IN ('SOLICITADO','EM_ANALISE','ATENDIDO_ESTOQUE','AGUARDANDO_PRODUCAO','CONCLUIDO','CANCELADO')),
+  criado_em     TIMESTAMP    DEFAULT NOW(),
+  atualizado_em TIMESTAMP    DEFAULT NOW()
 );
 
--- Forecast (previsão de demanda)
+-- Gera o número do pedido (PED-000001, PED-000002, ...) automaticamente
+CREATE OR REPLACE FUNCTION gerar_numero_pedido() RETURNS TRIGGER AS $$
+BEGIN
+  NEW.numero := 'PED-' || LPAD(NEW.id::text, 6, '0');
+  RETURN NEW;
+END;
+$$ LANGUAGE plpgsql;
+
+CREATE TRIGGER trg_numero_pedido
+BEFORE INSERT ON pedidos
+FOR EACH ROW EXECUTE FUNCTION gerar_numero_pedido();
+
+-- Itens do pedido (um produto + quantidade por linha)
+CREATE TABLE pedido_itens (
+  id         SERIAL PRIMARY KEY,
+  pedido_id  INTEGER      NOT NULL REFERENCES pedidos(id) ON DELETE CASCADE,
+  produto    VARCHAR(200) NOT NULL,
+  quantidade INTEGER      NOT NULL CHECK (quantidade > 0),
+  unidade    VARCHAR(20),
+  criado_em  TIMESTAMP    DEFAULT NOW()
+);
+
+-- Forecast (previsão de demanda) — nasce a partir de um item de pedido
 CREATE TABLE forecast (
   id               SERIAL PRIMARY KEY,
-  pedido_id        INTEGER REFERENCES pedidos_cliente(id) ON DELETE SET NULL,
+  pedido_item_id   INTEGER REFERENCES pedido_itens(id) ON DELETE SET NULL,
   produto          VARCHAR(200) NOT NULL,
   demanda_prevista INTEGER      NOT NULL CHECK (demanda_prevista > 0),
   data_inicio      DATE         NOT NULL,
