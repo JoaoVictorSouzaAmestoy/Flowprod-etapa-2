@@ -1,0 +1,384 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>FlowProd — Comercial</title>
+<link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+<style>
+  * { box-sizing:border-box; margin:0; padding:0; }
+  body { background:#080d14; color:#e8edf5; font-family:'Poppins',sans-serif; min-height:100vh; display:flex; flex-direction:column; }
+
+  /* TOPBAR */
+  .topbar { background:#0d1520; border-bottom:1px solid #1a2740; padding:0 32px; height:60px; display:flex; align-items:center; justify-content:space-between; flex-shrink:0; }
+  .topbar-left { display:flex; align-items:center; gap:12px; }
+  .logo { font-size:18px; font-weight:700; color:#2b7fff; letter-spacing:1px; }
+  .divider { width:1px; height:24px; background:#1a2740; }
+  .page-title { font-size:14px; color:#6b82a0; font-weight:500; }
+  .topbar-right { display:flex; align-items:center; gap:16px; }
+  .user-info { display:flex; align-items:center; gap:8px; }
+  .user-avatar { width:32px; height:32px; border-radius:50%; background:linear-gradient(135deg,#be185d,#ec4899); display:flex; align-items:center; justify-content:center; font-size:13px; font-weight:600; }
+  .user-name { font-size:13px; color:#a0b0c8; }
+  .btn-logout { background:none; border:1px solid #1a2740; color:#6b82a0; padding:6px 14px; border-radius:6px; font-size:12px; cursor:pointer; font-family:'Poppins',sans-serif; transition:.2s; }
+  .btn-logout:hover { border-color:#ec4899; color:#ec4899; }
+
+  /* Notificações */
+  .notif-wrap { position:relative; }
+  .notif-bell { background:none; border:1px solid #1a2740; border-radius:8px; color:#6b82a0; cursor:pointer; padding:6px 10px; font-size:16px; position:relative; }
+  .notif-bell:hover { border-color:#ec4899; color:#ec4899; }
+  .notif-count { position:absolute; top:-6px; right:-6px; background:#f43f5e; color:#fff; font-size:10px; font-weight:700; width:18px; height:18px; border-radius:50%; display:none; align-items:center; justify-content:center; border:2px solid #080d14; }
+  .notif-panel { display:none; position:absolute; top:calc(100% + 8px); right:0; width:320px; background:#0d1520; border:1px solid #1a2740; border-radius:12px; z-index:200; box-shadow:0 12px 40px rgba(0,0,0,.5); overflow:hidden; }
+  .notif-header { display:flex; align-items:center; justify-content:space-between; padding:13px 16px; border-bottom:1px solid #1a2740; gap:10px; }
+  .notif-header span { font-size:13px; font-weight:600; }
+  .notif-mark { background:none; border:none; color:#2b7fff; cursor:pointer; font-size:11px; font-family:'Poppins',sans-serif; }
+  .notif-mark:hover { text-decoration:underline; }
+  #notifLista { max-height:300px; overflow-y:auto; }
+  .notif-item { padding:12px 16px; border-bottom:1px solid #0d1825; display:flex; gap:10px; }
+  .notif-item.nao-lida { background:#0a1422; }
+  .notif-dot { width:7px; height:7px; border-radius:50%; background:#2b7fff; flex-shrink:0; margin-top:5px; }
+  .notif-dot.lida { background:transparent; }
+  .notif-titulo { font-size:13px; font-weight:600; }
+  .notif-msg { font-size:12px; color:#6b82a0; margin-top:2px; line-height:1.5; }
+  .notif-tempo { font-size:11px; color:#3a5070; margin-top:4px; }
+  .notif-vazia { padding:24px; text-align:center; font-size:13px; color:#3a5070; }
+
+  /* Module switcher */
+  #moduleSwitcher { position:relative; display:none; align-items:center; gap:0; background:#080d14; border:1px solid #1a2740; border-radius:8px; }
+  .mod-current { display:flex; align-items:center; gap:6px; padding:4px 10px; font-size:13px; color:#a0b0c8; }
+  .mod-arrow-btn { background:none; border:none; border-left:1px solid #1a2740; color:#6b82a0; cursor:pointer; padding:4px 8px; font-size:13px; }
+  .mod-arrow-btn:hover { color:#ec4899; background:#0a1220; }
+  .mod-dropdown { display:none; position:absolute; top:calc(100% + 6px); right:0; background:#0d1520; border:1px solid #1a2740; border-radius:10px; min-width:180px; z-index:50; overflow:hidden; box-shadow:0 8px 24px rgba(0,0,0,.4); }
+  .mod-item { display:flex; align-items:center; gap:10px; padding:11px 16px; font-size:13px; color:#e8edf5; text-decoration:none; }
+  .mod-item:hover { background:#1a2740; color:#ec4899; }
+
+  /* ── Conteúdo ── */
+  .main { flex:1; padding:28px 32px; }
+  .header-row { display:flex; align-items:center; justify-content:space-between; margin-bottom:20px; flex-wrap:wrap; gap:14px; }
+  .header-titulo { font-size:22px; font-weight:700; display:flex; align-items:center; gap:10px; }
+  .header-sub { font-size:13px; color:#4a6080; margin-top:4px; }
+
+  .filtros { display:flex; gap:8px; flex-wrap:wrap; }
+  .filtro-btn {
+    background:#0d1520; border:1px solid #1a2740; color:#6b82a0; font-family:'Poppins',sans-serif;
+    font-size:12px; font-weight:600; padding:7px 14px; border-radius:20px; cursor:pointer; transition:.2s;
+  }
+  .filtro-btn:hover { border-color:#ec4899; color:#ec4899; }
+  .filtro-btn.active { background:rgba(236,72,153,.12); border-color:rgba(236,72,153,.35); color:#ec4899; }
+
+  .pedido-card { background:#0d1520; border:1px solid #1a2740; border-radius:12px; margin-bottom:14px; overflow:hidden; }
+  .pedido-head { display:flex; align-items:center; justify-content:space-between; padding:16px 20px; cursor:pointer; gap:14px; flex-wrap:wrap; }
+  .pedido-head:hover { background:#0f1a2a; }
+  .pedido-info-esq { display:flex; align-items:center; gap:14px; flex-wrap:wrap; }
+  .pedido-num { font-size:14px; font-weight:700; }
+  .pedido-cliente { font-size:13px; color:#a0b0c8; }
+  .pedido-empresa { font-size:12px; color:#4a6080; }
+  .pedido-data { font-size:12px; color:#4a6080; }
+  .pedido-resumo { font-size:12px; color:#6b82a0; margin-top:2px; }
+  .status-pill { font-size:11px; font-weight:700; letter-spacing:.5px; text-transform:uppercase; padding:5px 13px; border-radius:20px; white-space:nowrap; }
+  .st-SOLICITADO          { background:rgba(43,127,255,.12); color:#2b7fff; border:1px solid rgba(43,127,255,.25); }
+  .st-EM_ANALISE          { background:rgba(245,158,11,.12); color:#f59e0b; border:1px solid rgba(245,158,11,.25); }
+  .st-ATENDIDO_ESTOQUE    { background:rgba(6,182,212,.12);  color:#06b6d4; border:1px solid rgba(6,182,212,.25); }
+  .st-AGUARDANDO_PRODUCAO { background:rgba(168,85,247,.12); color:#a855f7; border:1px solid rgba(168,85,247,.25); }
+  .st-CONCLUIDO           { background:rgba(34,197,94,.12);  color:#22c55e; border:1px solid rgba(34,197,94,.25); }
+  .st-CANCELADO           { background:rgba(244,63,94,.12);  color:#f43f5e; border:1px solid rgba(244,63,94,.25); }
+
+  .pedido-detalhe { display:none; padding:0 20px 18px; border-top:1px solid #1a2740; }
+  .pedido-detalhe.aberto { display:block; }
+  .item-linha { display:flex; justify-content:space-between; font-size:13px; padding:9px 0; border-bottom:1px solid #0d1928; }
+  .item-linha:last-child { border-bottom:none; }
+  .item-qtd { color:#6b82a0; }
+  .pedido-obs { font-size:12px; color:#4a6080; margin-top:10px; font-style:italic; }
+
+  .acoes { display:flex; gap:10px; flex-wrap:wrap; margin-top:16px; }
+  .btn-acao {
+    background:#080d14; border:1px solid #1a2740; color:#e8edf5; font-family:'Poppins',sans-serif;
+    font-size:12px; font-weight:600; padding:9px 16px; border-radius:8px; cursor:pointer; transition:.2s;
+  }
+  .btn-acao.primaria { background:linear-gradient(135deg,#be185d,#ec4899); border:none; color:#fff; }
+  .btn-acao:hover { opacity:.85; }
+  .btn-acao.cancelar { border-color:rgba(244,63,94,.3); color:#f43f5e; }
+  .btn-acao:disabled { opacity:.5; cursor:not-allowed; }
+
+  .vazio { text-align:center; color:#3a5070; font-size:13px; padding:60px 0; }
+</style>
+</head>
+<body>
+
+<div class="topbar">
+  <div class="topbar-left">
+    <span class="logo">FlowProd</span>
+    <div class="divider"></div>
+    <span class="page-title">Comercial — Pedidos</span>
+  </div>
+  <div class="topbar-right">
+    <div class="notif-wrap">
+      <button class="notif-bell" onclick="toggleNotif(event)" title="Notificações">
+        🔔
+        <span class="notif-count" id="notifCount"></span>
+      </button>
+      <div class="notif-panel" id="notifPanel">
+        <div class="notif-header">
+          <span>🔔 Notificações</span>
+          <button class="notif-mark" onclick="marcarLidas()">Marcar lidas</button>
+        </div>
+        <div id="notifLista"></div>
+      </div>
+    </div>
+    <div id="moduleSwitcher">
+      <div class="mod-current"><span>🤝 COMERCIAL</span></div>
+      <button class="mod-arrow-btn" onclick="toggleDropdown(event)" title="Trocar módulo">▾</button>
+      <div class="mod-dropdown" id="moduleDropdown"></div>
+    </div>
+    <div class="user-info">
+      <div class="user-avatar" id="avatar">?</div>
+      <span class="user-name" id="userName">Carregando...</span>
+    </div>
+    <button class="btn-logout" onclick="logout()">Sair</button>
+  </div>
+</div>
+
+<div class="main">
+  <div class="header-row">
+    <div>
+      <div class="header-titulo">📋 Pedidos recebidos</div>
+      <div class="header-sub">Analise as demandas dos clientes e encaminhe para estoque ou produção.</div>
+    </div>
+    <div class="filtros" id="filtros">
+      <button class="filtro-btn active" data-status="" onclick="filtrar('', this)">Todos</button>
+      <button class="filtro-btn" data-status="SOLICITADO" onclick="filtrar('SOLICITADO', this)">Solicitado</button>
+      <button class="filtro-btn" data-status="EM_ANALISE" onclick="filtrar('EM_ANALISE', this)">Em análise</button>
+      <button class="filtro-btn" data-status="ATENDIDO_ESTOQUE" onclick="filtrar('ATENDIDO_ESTOQUE', this)">Atendido</button>
+      <button class="filtro-btn" data-status="AGUARDANDO_PRODUCAO" onclick="filtrar('AGUARDANDO_PRODUCAO', this)">Em produção</button>
+      <button class="filtro-btn" data-status="CONCLUIDO" onclick="filtrar('CONCLUIDO', this)">Concluído</button>
+    </div>
+  </div>
+
+  <div id="listaPedidos"><div class="vazio">Carregando pedidos...</div></div>
+</div>
+
+<script>
+  fetch('/api/me', { credentials:'include', headers: { 'Accept': 'application/json' } })
+    .then(r => { if(!r.ok) throw new Error(); return r.json(); })
+    .then(d => {
+      const u = d.usuario;
+      const temAcesso = u.funcoes && (u.funcoes.includes('COMERCIAL') || u.funcoes.includes('FORECAST') || u.funcoes.includes('ADMIN'));
+      if (!temAcesso) { window.location.href = '/'; return; }
+      document.getElementById('userName').textContent = u.nome;
+      document.getElementById('avatar').textContent = u.nome.charAt(0).toUpperCase();
+      renderSwitcher(u.funcoes);
+    })
+    .catch(() => window.location.href = '/');
+
+  async function logout() {
+    await fetch('/api/logout', { method:'POST', credentials:'include' });
+    window.location.href = '/';
+  }
+
+  // ── Troca de módulo ──
+  const DEST = {
+    FORECAST:'/tela2.html', PMP:'/tela3.html', MRP:'/tela4.html',
+    ESTOQUE:'/tela5.html',  CRP:'/tela6.html', DASHBOARD:'/dashboard.html', ADMIN:'/admin.html',
+    COMERCIAL:'/comercial.html'
+  };
+  const ICON = { FORECAST:'📊', PMP:'📋', MRP:'⚙️', ESTOQUE:'📦', CRP:'🏭', DASHBOARD:'📈', ADMIN:'🛠️', COMERCIAL:'🤝' };
+  const LABEL = { FORECAST:'Forecast', PMP:'PMP', MRP:'MRP', ESTOQUE:'Estoque', CRP:'CRP', DASHBOARD:'Dashboard', ADMIN:'Admin', COMERCIAL:'Comercial' };
+  let _outrosFuncoes = [];
+
+  function renderSwitcher(funcoes) {
+    _outrosFuncoes = (funcoes||[]).filter(f => f !== 'COMERCIAL');
+    const sw = document.getElementById('moduleSwitcher');
+    if (!sw) return;
+    sw.style.display = _outrosFuncoes.length === 0 ? 'none' : 'flex';
+  }
+  function toggleDropdown(e) {
+    e.stopPropagation();
+    const dd = document.getElementById('moduleDropdown');
+    const open = dd.style.display === 'block';
+    dd.style.display = 'none';
+    if (!open) {
+      dd.innerHTML = _outrosFuncoes.map(f => `<a class="mod-item" href="${DEST[f]||'/'}">${ICON[f]||'🔧'} ${LABEL[f]||f}</a>`).join('');
+      dd.style.display = 'block';
+    }
+  }
+  document.addEventListener('click', () => {
+    const dd = document.getElementById('moduleDropdown');
+    if (dd) dd.style.display = 'none';
+  });
+
+  // ── Notificações (mesmo padrão das demais telas internas) ──
+  let _notifAbertas = false;
+  function toggleNotif(e) {
+    e.stopPropagation();
+    const p = document.getElementById('notifPanel');
+    _notifAbertas = !_notifAbertas;
+    p.style.display = _notifAbertas ? 'block' : 'none';
+    if (_notifAbertas) carregarNotif();
+  }
+  document.addEventListener('click', () => {
+    if (_notifAbertas) { document.getElementById('notifPanel').style.display = 'none'; _notifAbertas = false; }
+  });
+  document.getElementById('notifPanel')?.addEventListener('click', e => e.stopPropagation());
+
+  async function carregarNotif() {
+    try {
+      const r = await fetch('/api/notificacoes', { credentials:'include' });
+      const d = await r.json();
+      renderNotif(d.notificacoes || []);
+    } catch {}
+  }
+  function renderNotif(lista) {
+    const el = document.getElementById('notifLista');
+    if (!lista.length) { el.innerHTML = '<div class="notif-vazia">Sem notificações 🎉</div>'; return; }
+    el.innerHTML = lista.map(n => {
+      const lida = n.lida;
+      const diff = Date.now() - new Date(n.criado_em).getTime();
+      const min = Math.floor(diff/60000), h = Math.floor(diff/3600000), d = Math.floor(diff/86400000);
+      const tempo = min<1?'agora':min<60?`há ${min}min`:h<24?`há ${h}h`:`há ${d}d`;
+      return `<div class="notif-item ${lida?'':'nao-lida'}">
+        <div class="notif-dot ${lida?'lida':''}"></div>
+        <div style="flex:1;">
+          <div class="notif-titulo">${n.titulo}</div>
+          ${n.mensagem ? `<div class="notif-msg">${n.mensagem.replace(/\\n/g,'<br>')}</div>` : ''}
+          <div class="notif-tempo">${tempo}</div>
+        </div>
+      </div>`;
+    }).join('');
+  }
+  async function marcarLidas() {
+    try {
+      await fetch('/api/notificacoes/marcar-lidas', { method:'POST', credentials:'include' });
+      document.getElementById('notifCount').style.display = 'none';
+      carregarNotif();
+    } catch {}
+  }
+  async function atualizarBadgeNotif() {
+    try {
+      const r = await fetch('/api/notificacoes/nao-lidas/contagem', { credentials:'include' });
+      const d = await r.json();
+      const badge = document.getElementById('notifCount');
+      if (d.total > 0) { badge.textContent = d.total > 9 ? '9+' : d.total; badge.style.display = 'inline-flex'; }
+      else badge.style.display = 'none';
+    } catch {}
+  }
+  atualizarBadgeNotif();
+  setInterval(atualizarBadgeNotif, 30000);
+
+  function conectarSSE() {
+    const es = new EventSource('/api/notificacoes/stream', { withCredentials: true });
+    es.addEventListener('message', () => {
+      atualizarBadgeNotif();
+      if (_notifAbertas) carregarNotif();
+    });
+    es.addEventListener('error', () => { es.close(); setTimeout(conectarSSE, 5000); });
+  }
+  conectarSSE();
+
+  // ── Pedidos ──────────────────────────────────────────────
+  const STATUS_LABEL = {
+    SOLICITADO: 'Solicitado', EM_ANALISE: 'Em análise',
+    ATENDIDO_ESTOQUE: 'Atendido pelo estoque', AGUARDANDO_PRODUCAO: 'Aguardando produção',
+    CONCLUIDO: 'Concluído', CANCELADO: 'Cancelado',
+  };
+  // Próximas ações válidas a partir de cada status (fluxo: solicitado → análise → estoque OU produção → concluído)
+  const PROXIMAS_ACOES = {
+    SOLICITADO:          [{ status:'EM_ANALISE',          label:'▶ Iniciar análise' }],
+    EM_ANALISE:          [{ status:'ATENDIDO_ESTOQUE',    label:'📦 Atender com estoque' },
+                           { status:'AGUARDANDO_PRODUCAO', label:'🏭 Enviar para produção' }],
+    ATENDIDO_ESTOQUE:    [{ status:'CONCLUIDO',           label:'✔ Concluir pedido' }],
+    AGUARDANDO_PRODUCAO: [{ status:'CONCLUIDO',           label:'✔ Concluir pedido' }],
+    CONCLUIDO:  [],
+    CANCELADO:  [],
+  };
+
+  let _filtroAtual = '';
+  let _pedidos = [];
+
+  function filtrar(status, btn) {
+    _filtroAtual = status;
+    document.querySelectorAll('.filtro-btn').forEach(b => b.classList.remove('active'));
+    btn.classList.add('active');
+    renderLista();
+  }
+
+  async function carregarPedidos() {
+    try {
+      const r = await fetch('/api/pedidos', { credentials:'include' });
+      if (!r.ok) throw new Error();
+      const d = await r.json();
+      _pedidos = d.pedidos || [];
+      renderLista();
+    } catch {
+      document.getElementById('listaPedidos').innerHTML = '<div class="vazio">Erro ao carregar pedidos.</div>';
+    }
+  }
+
+  function renderLista() {
+    const el = document.getElementById('listaPedidos');
+    const lista = _filtroAtual ? _pedidos.filter(p => p.status === _filtroAtual) : _pedidos;
+    if (!lista.length) { el.innerHTML = '<div class="vazio">Nenhum pedido encontrado.</div>'; return; }
+    el.innerHTML = lista.map(renderPedido).join('');
+  }
+
+  function renderPedido(p) {
+    const data = new Date(p.criado_em).toLocaleDateString('pt-BR');
+    const desejada = p.data_desejada ? new Date(p.data_desejada + 'T00:00').toLocaleDateString('pt-BR') : null;
+    const resumo = p.itens.map(it => `${it.quantidade}x ${it.produto}`).join(', ');
+    const itensHtml = p.itens.map(it => `
+      <div class="item-linha">
+        <span>${it.produto}</span>
+        <span class="item-qtd">${it.quantidade}${it.unidade ? ' ' + it.unidade : ''}</span>
+      </div>`).join('');
+
+    const acoes = (PROXIMAS_ACOES[p.status] || []).map(a =>
+      `<button class="btn-acao primaria" onclick="event.stopPropagation(); atualizarStatus(${p.id}, '${a.status}', this)">${a.label}</button>`
+    ).join('');
+    const btnCancelar = (p.status !== 'CONCLUIDO' && p.status !== 'CANCELADO')
+      ? `<button class="btn-acao cancelar" onclick="event.stopPropagation(); if(confirm('Cancelar este pedido?')) atualizarStatus(${p.id}, 'CANCELADO', this)">✕ Cancelar</button>`
+      : '';
+
+    return `
+      <div class="pedido-card" id="pedido-${p.id}">
+        <div class="pedido-head" onclick="this.nextElementSibling.classList.toggle('aberto')">
+          <div class="pedido-info-esq">
+            <div>
+              <div class="pedido-num">${p.numero}</div>
+              <div class="pedido-cliente">${p.cliente_nome}${p.cliente_empresa ? ' · ' + p.cliente_empresa : ''}</div>
+            </div>
+            <div>
+              <div class="pedido-data">Feito em ${data}${desejada ? ' · entrega desejada ' + desejada : ''}</div>
+              <div class="pedido-resumo">${resumo}</div>
+            </div>
+          </div>
+          <span class="status-pill st-${p.status}">${STATUS_LABEL[p.status] || p.status}</span>
+        </div>
+        <div class="pedido-detalhe">
+          ${itensHtml}
+          ${p.observacoes ? `<div class="pedido-obs">"${p.observacoes}"</div>` : ''}
+          <div class="acoes">${acoes}${btnCancelar}</div>
+        </div>
+      </div>`;
+  }
+
+  async function atualizarStatus(id, novoStatus, btn) {
+    const grupo = btn.closest('.acoes');
+    grupo.querySelectorAll('button').forEach(b => b.disabled = true);
+    try {
+      const r = await fetch(`/api/pedidos/${id}/status`, {
+        method:'PATCH', credentials:'include',
+        headers:{'Content-Type':'application/json'},
+        body: JSON.stringify({ status: novoStatus })
+      });
+      if (!r.ok) throw new Error();
+      const idx = _pedidos.findIndex(p => p.id === id);
+      if (idx >= 0) _pedidos[idx].status = novoStatus;
+      renderLista();
+    } catch {
+      alert('Erro ao atualizar o status do pedido.');
+      grupo.querySelectorAll('button').forEach(b => b.disabled = false);
+    }
+  }
+
+  carregarPedidos();
+</script>
+</body>
+</html>
