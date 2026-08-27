@@ -58,11 +58,11 @@ async function login(req, res) {
     const destinos = {
       ADMIN:           '/admin.html',
       COMERCIAL:       '/comercial.html',
-      FORECAST:        '/tela2.html',
+      FORECAST:        '/forecast.html',
       PAP:             '/pap.html',
-      PMP:             '/tela3.html',
-      MRP:             '/tela4.html',
-      ESTOQUE:         '/tela5.html',
+      PMP:             '/pmp.html',
+      MRP:             '/mrp.html',
+      ESTOQUE:         '/estoque.html',
       COMPRA_PRODUCAO: '/compra-producao.html',
     };
 
