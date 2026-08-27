@@ -305,6 +305,15 @@ input:focus { border-color: var(--blue); box-shadow: 0 0 0 3px rgba(43,127,255,.
           <div class="modulos-sub">Selecione as telas que você precisa acessar</div>
           <div class="modulos-grid" id="modulosGrid">
             <label class="modulo-item" onclick="toggleModulo(this)">
+              <input type="checkbox" value="COMERCIAL">
+              <div class="mod-check"></div>
+              <i class="ti ti-users mod-icon" style="color:#ec4899"></i>
+              <div class="mod-info">
+                <span class="mod-nome">Comercial</span>
+                <span class="mod-desc">Clientes, pedidos e demanda</span>
+              </div>
+            </label>
+            <label class="modulo-item" onclick="toggleModulo(this)">
               <input type="checkbox" value="FORECAST">
               <div class="mod-check"></div>
               <i class="ti ti-chart-line mod-icon" style="color:#2b7fff"></i>
@@ -314,9 +323,18 @@ input:focus { border-color: var(--blue); box-shadow: 0 0 0 3px rgba(43,127,255,.
               </div>
             </label>
             <label class="modulo-item" onclick="toggleModulo(this)">
+              <input type="checkbox" value="PAP">
+              <div class="mod-check"></div>
+              <i class="ti ti-list-details mod-icon" style="color:#00d4ff"></i>
+              <div class="mod-info">
+                <span class="mod-nome">PAP</span>
+                <span class="mod-desc">Plano Agregado</span>
+              </div>
+            </label>
+            <label class="modulo-item" onclick="toggleModulo(this)">
               <input type="checkbox" value="PMP">
               <div class="mod-check"></div>
-              <i class="ti ti-clipboard-list mod-icon" style="color:#00d4ff"></i>
+              <i class="ti ti-clipboard-list mod-icon" style="color:#38bdf8"></i>
               <div class="mod-info">
                 <span class="mod-nome">PMP</span>
                 <span class="mod-desc">Plano Mestre</span>
@@ -328,7 +346,7 @@ input:focus { border-color: var(--blue); box-shadow: 0 0 0 3px rgba(43,127,255,.
               <i class="ti ti-settings-2 mod-icon" style="color:#a855f7"></i>
               <div class="mod-info">
                 <span class="mod-nome">MRP</span>
-                <span class="mod-desc">Planejamento</span>
+                <span class="mod-desc">Necessidade de materiais</span>
               </div>
             </label>
             <label class="modulo-item" onclick="toggleModulo(this)">
@@ -341,30 +359,12 @@ input:focus { border-color: var(--blue); box-shadow: 0 0 0 3px rgba(43,127,255,.
               </div>
             </label>
             <label class="modulo-item" onclick="toggleModulo(this)">
-              <input type="checkbox" value="CRP">
+              <input type="checkbox" value="COMPRA_PRODUCAO">
               <div class="mod-check"></div>
               <i class="ti ti-building-factory-2 mod-icon" style="color:#f97316"></i>
               <div class="mod-info">
-                <span class="mod-nome">CRP</span>
-                <span class="mod-desc">Capacidade</span>
-              </div>
-            </label>
-            <label class="modulo-item" onclick="toggleModulo(this)">
-              <input type="checkbox" value="DASHBOARD">
-              <div class="mod-check"></div>
-              <i class="ti ti-layout-dashboard mod-icon" style="color:#f59e0b"></i>
-              <div class="mod-info">
-                <span class="mod-nome">Dashboard</span>
-                <span class="mod-desc">KPIs e indicadores</span>
-              </div>
-            </label>
-            <label class="modulo-item" onclick="toggleModulo(this)">
-              <input type="checkbox" value="COMERCIAL">
-              <div class="mod-check"></div>
-              <i class="ti ti-users mod-icon" style="color:#ec4899"></i>
-              <div class="mod-info">
-                <span class="mod-nome">Comercial</span>
-                <span class="mod-desc">Clientes e pedidos</span>
+                <span class="mod-nome">Compra/Produção</span>
+                <span class="mod-desc">Execução de ordens</span>
               </div>
             </label>
           </div>
