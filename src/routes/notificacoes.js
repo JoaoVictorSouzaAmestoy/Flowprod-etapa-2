@@ -145,13 +145,13 @@ router.post('/enviar-nova-funcao', autenticar, async (req, res) => {
     }
     
     const FUNCOES = {
+      COMERCIAL: '🤝 Comercial',
       FORECAST: '📊 Previsão de Demanda',
+      PAP: '📐 Plano Agregado de Produção',
       PMP: '📋 Plano Mestre de Produção',
-      MRP: '🔩 Planejamento de Recursos',
+      MRP: '🔩 Planejamento de Materiais',
       ESTOQUE: '📦 Gestão de Estoque',
-      CRP: '🏭 Planejamento de Capacidade',
-      DASHBOARD: '📈 Visão Geral',
-      COMERCIAL: '🤝 Comercial'
+      COMPRA_PRODUCAO: '🏭 Compra/Produção'
     };
     
     const nomeFuncao = FUNCOES[funcao] || funcao;
