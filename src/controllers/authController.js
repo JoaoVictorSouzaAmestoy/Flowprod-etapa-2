@@ -56,20 +56,20 @@ async function login(req, res) {
 
     // Mapa de funções → telas
     const destinos = {
-      ADMIN:     '/admin.html',
-      FORECAST:  '/tela2.html',
-      PMP:       '/tela3.html',
-      MRP:       '/tela4.html',
-      ESTOQUE:   '/tela5.html',
-      CRP:       '/tela6.html',
-      DASHBOARD: '/dashboard.html',
-      COMERCIAL: '/comercial.html',
+      ADMIN:           '/admin.html',
+      COMERCIAL:       '/comercial.html',
+      FORECAST:        '/tela2.html',
+      PAP:             '/pap.html',
+      PMP:             '/tela3.html',
+      MRP:             '/tela4.html',
+      ESTOQUE:         '/tela5.html',
+      COMPRA_PRODUCAO: '/compra-producao.html',
     };
 
     // Monta lista de telas que o usuário pode acessar
     const telasDisponiveis = (usuario.funcoes || []).map(f => ({
       funcao: f,
-      url:    destinos[f] || '/tela2.html',
+      url:    destinos[f] || '/comercial.html',
     }));
 
     // ✅ Envia notificação SSE de boas-vindas ao fazer login
