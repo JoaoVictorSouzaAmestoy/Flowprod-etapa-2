@@ -206,17 +206,9 @@
   }
 
   // ── Troca de módulo sem novo login ──
-  const DEST = {
-    FORECAST:'/tela2.html', PMP:'/tela3.html', MRP:'/tela4.html',
-    ESTOQUE:'/tela5.html',  CRP:'/tela6.html', DASHBOARD:'/dashboard.html', ADMIN:'/admin.html'
-  };
-  const ICON = {
-    FORECAST:'📊', PMP:'📋', MRP:'⚙️', ESTOQUE:'📦', CRP:'🏭', DASHBOARD:'📈', ADMIN:'🛠️'
-  };
-  const LABEL = {
-    FORECAST:'Forecast', PMP:'PMP', MRP:'MRP', ESTOQUE:'Estoque',
-    CRP:'CRP', DASHBOARD:'Dashboard', ADMIN:'Admin'
-  };
+  const DEST = { COMERCIAL:'/comercial.html', FORECAST:'/tela2.html', PAP:'/pap.html', PMP:'/tela3.html', MRP:'/tela4.html', ESTOQUE:'/tela5.html', COMPRA_PRODUCAO:'/compra-producao.html', ADMIN:'/admin.html' };
+  const ICON = { COMERCIAL:'🤝', FORECAST:'📊', PAP:'📐', PMP:'📋', MRP:'⚙️', ESTOQUE:'📦', COMPRA_PRODUCAO:'🏭', ADMIN:'🛠️' };
+  const LABEL = { COMERCIAL:'Comercial', FORECAST:'Forecast', PAP:'PAP', PMP:'PMP', MRP:'MRP', ESTOQUE:'Estoque', COMPRA_PRODUCAO:'Compra/Produção', ADMIN:'Admin' };
   let _outrosFuncoes = [];
 
   function renderSwitcher(funcoes) {
