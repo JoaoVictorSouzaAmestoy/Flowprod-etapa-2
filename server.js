@@ -116,9 +116,13 @@ app.get('/painel-alertas.html',     pub('painel-alertas.html'));
 
 app.get('/admin.html', autenticar, autorizarFuncao('ADMIN'), pub('admin.html'));
 
-['tela2','tela3','tela4','tela5','tela6','dashboard'].forEach(t =>
-  app.get(`/${t}.html`, autenticar, pub(`${t}.html`))
-);
+app.get('/comercial.html',       autenticar, autorizarFuncao('COMERCIAL', 'ADMIN'),       pub('comercial.html'));
+app.get('/forecast.html',        autenticar, autorizarFuncao('FORECAST', 'ADMIN'),        pub('forecast.html'));
+app.get('/pap.html',             autenticar, autorizarFuncao('PAP', 'ADMIN'),             pub('pap.html'));
+app.get('/pmp.html',             autenticar, autorizarFuncao('PMP', 'ADMIN'),             pub('pmp.html'));
+app.get('/mrp.html',             autenticar, autorizarFuncao('MRP', 'ADMIN'),             pub('mrp.html'));
+app.get('/estoque.html',         autenticar, autorizarFuncao('ESTOQUE', 'ADMIN'),         pub('estoque.html'));
+app.get('/compra-producao.html', autenticar, autorizarFuncao('COMPRA_PRODUCAO', 'ADMIN'), pub('compra-producao.html'));
 
 app.get('/pedido.html', (req, res) => {
   const jwt   = require('jsonwebtoken');
